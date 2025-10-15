@@ -53,16 +53,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     
     const menusFiltrados = filtrarMenusPorAcesso(
       data.navMain,
-      user?.nivel_acesso?.menus ?? []
+      user?.nivel_acesso?.menus ?? [""]
     )
 
     const flowsFiltrados = filtrarMenusPorAcesso(
       data.flow ?? [],
-      user?.nivel_acesso?.menus ?? []
+      user?.nivel_acesso?.menus ?? [""]
     )
 
     setSideItems({
-      navMain: menusFiltrados,
+      navMain: data.navMain,
       flow: flowsFiltrados,
     })
   }, [user])
@@ -88,7 +88,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         {sideItems.flow.length > 0 && <NavMain items={sideItems.flow} title="Fluxos" />}
-        {sideItems.navMain.length > 0 && <NavMain items={sideItems.navMain} title="Menu" />}
+        {data.navMain.length > 0 && <NavMain items={data.navMain} title="Menu" />}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

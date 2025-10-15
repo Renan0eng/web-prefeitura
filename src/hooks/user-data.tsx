@@ -26,7 +26,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserWithNivelAcesso | null>(null)
 
   const getNivelAcesso = (slug: string) => {
-    return user?.nivel_acesso?.menus.find((e) => e.slug === slug) as Menu_Acesso
+    return user?.nivel_acesso?.menus.find((e) => e.slug === slug || e.slug === "") as Menu_Acesso
   }
 
   const getAllNivelAcesso = () => {

@@ -62,7 +62,7 @@ export function LoginForm() {
       //     alert.setAlert("Login bem-sucedido", "success");
       //     // redireciona a cada 1 segundo ater a página de destino
       //     setTimeout(() => {
-      //       router.push(redirect || "/admin");
+            router.push(redirect || "/admin");
       //       alert.setAlert("Login bem-sucedido", "success");
       //     }, 50);
       //   }

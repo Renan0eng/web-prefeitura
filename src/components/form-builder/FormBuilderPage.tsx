@@ -57,11 +57,37 @@ export const FormBuilderPage = () => {
     }, [formState, isMounted]);
 
     const handleOnDragEnd = (result: DropResult) => {
-        if (!result.destination) return;
-        const items = Array.from(formState.questions);
-        const [reorderedItem] = items.splice(result.source.index, 1);
-        items.splice(result.destination.index, 0, reorderedItem);
-        setFormState({ ...formState, questions: items });
+        const { source, destination, type } = result;
+
+        if (!destination) return;
+
+        // Lógica para reordenar as PERGUNTAS
+        if (type === 'question') {
+            const items = Array.from(formState.questions);
+            const [reorderedItem] = items.splice(source.index, 1);
+            items.splice(destination.index, 0, reorderedItem);
+            setFormState({ ...formState, questions: items });
+            return; // Encerra a função aqui
+        }
+
+        // Lógica para reordenar as OPÇÕES DE RESPOSTA
+        if (type === 'option') {
+            const questionId = source.droppableId; // O ID da área "droppable" da opção é o ID da pergunta
+            const question = formState.questions.find(q => q.id === questionId);
+            if (!question) return;
+
+            // Reordena as opções dentro da pergunta encontrada
+            const reorderedOptions = Array.from(question.options);
+            const [movedOption] = reorderedOptions.splice(source.index, 1);
+            reorderedOptions.splice(destination.index, 0, movedOption);
+
+            // Atualiza o estado global com a pergunta modificada
+            const updatedQuestions = formState.questions.map(q =>
+                q.id === questionId ? { ...q, options: reorderedOptions } : q
+            );
+
+            setFormState({ ...formState, questions: updatedQuestions });
+        }
     };
 
     const addQuestion = () => {
@@ -144,7 +170,7 @@ export const FormBuilderPage = () => {
 
                 {/* Lista de Perguntas */}
                 <DragDropContext onDragEnd={handleOnDragEnd}>
-                    <Droppable droppableId="questions">
+                    <Droppable droppableId="questions" type="question">
                         {(provided) => (
                             <div {...provided.droppableProps} ref={provided.innerRef}>
                                 {formState.questions.map((question, index) => (

@@ -125,7 +125,7 @@ export function filtrarMenusPorAcesso(
     .map((a) => a.slug)
 
   return menus
-    .filter((menu) => slugsPermitidos.includes(menu.nivel_acesso))
+    // .filter((menu) => slugsPermitidos.includes(menu.nivel_acesso) || menu.nivel_acesso === "")
     .map((menu) => ({
       ...menu,
       items: menu.items,

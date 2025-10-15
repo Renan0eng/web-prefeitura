@@ -16,11 +16,15 @@ export const data = {
       url: "#",
       icon: Wrench,
       isActive: false,
-      nivel_acesso: "ferramentas",
+      nivel_acesso: "",
       items: [
+        // {
+        //   title: "Scrumboard",
+        //   url: "/ferramentas/scrumboard",
+        // },
         {
-          title: "Scrumboard",
-          url: "/admin/ferramentas/scrumboard",
+          title: "Form Builder",
+          url: "/ferramentas/formBuilder",
         },
       ],
     },
