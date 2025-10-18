@@ -1,8 +1,5 @@
 "use client"
 
-import {
-  LucideIcon
-} from "lucide-react"
 import * as React from "react"
 
 import { NavMain } from "@/components/nav-main"
@@ -15,57 +12,49 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useUser } from "@/hooks/user-data"
+import { useAuth } from "@/hooks/use-auth"
 import { data } from "@/lib/nav"
-import { filtrarMenusPorAcesso } from "@/lib/utils"
 import { NavUser } from "./nav-user"
 
-type Menu = {
-  navMain: {
-    title: string
-    url: string
-    icon: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[],
-  flow: {
-    title: string
-    url: string
-    icon: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
-}
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [sideItems, setSideItems] = React.useState<Menu>({ navMain: [], flow: [] })
-  const { user } = useUser()
+  // const [sideItems, setSideItems] = React.useState<Menu>({ navMain: [], flow: [] })
+  const { user } = useAuth()
 
+  const filteredMenu = React.useMemo(() => {
+    if (!user?.nivel_acesso?.menus) {
+      return { navMain: [], flow: [] };
+    }
 
-  React.useEffect(() => {
-    if (!user) return
-    
-    const menusFiltrados = filtrarMenusPorAcesso(
-      data.navMain,
-      user?.nivel_acesso?.menus ?? [""]
-    )
+    const userPermissions = new Set(
+      user.nivel_acesso.menus
+        .filter(permission => permission.visualizar)
+        .map(permission => permission.slug)
+    );
 
-    const flowsFiltrados = filtrarMenusPorAcesso(
-      data.flow ?? [],
-      user?.nivel_acesso?.menus ?? [""]
-    )
+    const filterRecursive = (items: any[]) => {
+      return items.reduce((acc, item) => {
+        const isPublic = !item.nivel_acesso;
+        const hasPermission = userPermissions.has(item.nivel_acesso);
 
-    setSideItems({
-      navMain: data.navMain,
-      flow: flowsFiltrados,
-    })
-  }, [user])
+        if (isPublic || hasPermission) {
+          const newItem = { ...item };
+
+          if (item.items) {
+            newItem.items = filterRecursive(item.items);
+          }
+
+          acc.push(newItem);
+        }
+
+        return acc;
+      }, []);
+    };
+
+    return {
+      navMain: filterRecursive(data.navMain),
+      flow: filterRecursive(data.flow),
+    };
+  }, [user]);
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -78,8 +67,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <img src="/logo.webp" alt="Logo" className="h-8 w-8" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Icarus</span>
-                  <span className="truncate text-xs">Produção Aquícola</span>
+                  <span className="truncate font-semibold">PVAI SEM DOR</span>
+                  {
+                    user?.nivel_acesso.nome ? (
+                      <span className="truncate text-xs">{user?.nivel_acesso.nome}</span>
+                    ) :
+                      (
+                        <div className="animate-pulse h-4 w-24 rounded-sm bg-white" />
+                      )
+                  }
                 </div>
               </a>
             </SidebarMenuButton>
@@ -87,8 +83,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {sideItems.flow.length > 0 && <NavMain items={sideItems.flow} title="Fluxos" />}
-        {data.navMain.length > 0 && <NavMain items={data.navMain} title="Menu" />}
+        {filteredMenu.flow.length > 0 && <NavMain items={filteredMenu.flow} title="Fluxos" />}
+        {filteredMenu.navMain.length > 0 && <NavMain items={filteredMenu.navMain} title="Menu" />}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

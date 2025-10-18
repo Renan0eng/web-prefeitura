@@ -1,5 +1,6 @@
 import { GlobalAlert } from "@/components/Alert";
 import { AlertProvider } from "@/hooks/use-alert";
+import { AuthProvider } from "@/hooks/use-auth";
 
 export const metadata = {
   title: "Next.js",
@@ -15,8 +16,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AlertProvider>
-          <GlobalAlert />
-          {children}
+          <AuthProvider>
+            <GlobalAlert />
+            {children}
+          </AuthProvider>
         </AlertProvider>
       </body>
     </html>

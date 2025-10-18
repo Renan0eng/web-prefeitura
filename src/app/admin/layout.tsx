@@ -10,7 +10,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AlertProvider } from "@/hooks/use-alert";
-import { UserProvider } from "@/hooks/user-data";
+import { AuthProvider } from "@/hooks/use-auth";
 import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
@@ -27,8 +27,8 @@ export default async function RootLayout({
   return (
     <html>
       <body>
-        <UserProvider>
         <AlertProvider>
+        <AuthProvider>
           <GlobalAlert />
           <SidebarProvider>
             <AppSidebar />
@@ -45,9 +45,9 @@ export default async function RootLayout({
               </div>
             </SidebarInset>
           </SidebarProvider>
+        </AuthProvider>
         </AlertProvider>
         <Analytics />
-        </UserProvider>
       </body>
     </html>
   )

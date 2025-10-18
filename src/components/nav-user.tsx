@@ -24,44 +24,19 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { useUser } from "@/hooks/user-data"
+import { useAuth } from "@/hooks/use-auth"
 import { useRouter } from "next/navigation"
-import React from "react"
 
 export function NavUser() {
 
-  const [userData, setUserData] = React.useState<{
-      name: string
-      email: string
-      avatar: string
-    }>({
-      name: "Ícarus",
-      email: "icarus@example.com",
-      avatar: "/logo.webp"
-    })
-  
-    const { user } = useUser();
-    const fetchUserData = async () => {
-      setUserData({
-        name: user?.name || "Ícarus",
-        email: user?.email || "icarus@example.com",
-        avatar: user?.avatar || "/logo.webp",
-      });
-    };
-    React.useEffect(() => {
-  
-      fetchUserData();
-  
-    }, [])
+  const { user, logout } = useAuth();
 
   const { isMobile } = useSidebar()
 
   const router = useRouter();
 
-  if (!userData) return null;
-
-  const firstName = userData.name.split(" ")[0];
-  const lastName = userData.name.split(" ")[1] || "";
+  const firstName = user?.name?.split(" ")[0];
+  const lastName = user?.name?.split(" ")[1] || "";
 
   return (
     <SidebarMenu>
@@ -73,12 +48,21 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={userData.avatar} alt={userData.name} />
-                <AvatarFallback className="rounded-lg">{firstName.charAt(0)}{lastName.charAt(0)}</AvatarFallback>
+                <AvatarImage src={user?.avatar || undefined} alt={user?.name} />
+                <AvatarFallback className="rounded-lg">{firstName?.charAt(0)}{lastName.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{userData.name}</span>
-                <span className="truncate text-xs">{userData.email}</span>
+                {user ? (
+                  <>
+                    <span className="truncate font-semibold">{user?.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                  </>
+                ) : (
+                  <div className="animate-pulse space-y-1.5">
+                    <div className="h-4 w-24 rounded-sm bg-white" />
+                    <div className="h-3 w-32 rounded-sm bg-white" />
+                  </div>
+                )}
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -92,25 +76,34 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={userData.avatar} alt={userData.name} />
-                  <AvatarFallback className="rounded-lg">{firstName.charAt(0)}{lastName.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={user?.avatar || undefined} alt={user?.name} />
+                  <AvatarFallback className="rounded-lg">{firstName?.charAt(0)}{lastName?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{userData.name}</span>
-                  <span className="truncate text-xs">{userData.email}</span>
+                  {user ? (
+                    <>
+                      <span className="truncate font-semibold">{user?.name}</span>
+                      <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                    </>
+                  ) : (
+                    <div className="animate-pulse space-y-1.5">
+                      <div className="h-4 w-24 rounded-sm bg-white" />
+                      <div className="h-3 w-32 rounded-sm bg-white" />
+                    </div>
+                  )}
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {
-                // logout();
-                console.log("logout");
+                logout();
                 router.refresh();
               }}
+              className="font-bold justify-center"
             >
               <LogOut />
-              Log out
+              Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAlert } from "@/hooks/use-alert";
+import { useAuth } from "@/hooks/use-auth";
 import { loginSchema, LoginSchema } from "@/Schemas/login";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
@@ -27,7 +27,8 @@ export function LoginForm() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const alert = useAlert();
+
+  const { login } = useAuth();
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -47,31 +48,10 @@ export function LoginForm() {
   const onSubmit = async (data: LoginSchema) => {
     try {
       setLoading(true);
-      // const response = await signIn(data);
-
-      // if (response) {
-      //   if (response.message) {
-      //     alert.setAlert(response.message, "error");
-      //     return;
-      //   }
-
-      //   if (response.token) {
-      //     window.localStorage.setItem("User", JSON.stringify(response.user));
-
-      //     router.push(redirect || "/admin");
-      //     alert.setAlert("Login bem-sucedido", "success");
-      //     // redireciona a cada 1 segundo ater a página de destino
-      //     setTimeout(() => {
-            router.push(redirect || "/admin");
-      //       alert.setAlert("Login bem-sucedido", "success");
-      //     }, 50);
-      //   }
-      // } else {
-      //   alert.setAlert("Credenciais inválidas", "error");
-      // }
-    } catch (err) {
+      await login(data.email, data.password);
+      router.push(redirect || "/admin");
+    } catch (err: any) {
       console.error(err);
-      alert.setAlert(`${err}`, "error");
     } finally {
       setLoading(false);
     }

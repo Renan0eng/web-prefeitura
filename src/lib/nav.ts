@@ -16,7 +16,7 @@ export const data = {
       url: "#",
       icon: Wrench,
       isActive: false,
-      nivel_acesso: "",
+      nivel_acesso: "ferramentas",
       items: [
         // {
         //   title: "Scrumboard",
@@ -24,7 +24,7 @@ export const data = {
         // },
         {
           title: "Form Builder",
-          url: "/ferramentas/formBuilder",
+          url: "admin/ferramentas/formBuilder",
         },
       ],
     },
