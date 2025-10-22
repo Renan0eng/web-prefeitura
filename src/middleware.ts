@@ -4,6 +4,14 @@ import { NextResponse } from 'next/server';
 const COOKIE_NAME = 'refresh_token';
 
 export function middleware(request: NextRequest) {
+
+    // se a rota for / redireciona para /admin
+    console.log("request.nextUrl.pathname", request.nextUrl.pathname);
+    
+    if (request.nextUrl.pathname === '/') {
+        return NextResponse.redirect(new URL('/admin', request.url));
+    }
+
     const sessionCookie = request.cookies.get(COOKIE_NAME);
 
     if (!sessionCookie) {
@@ -16,8 +24,11 @@ export function middleware(request: NextRequest) {
 
     return NextResponse.next();
 }
+
 export const config = {
     matcher: [
-        '/admin/:path*',
+        '/',           // para redirecionar a raiz
+        '/admin/:path*', // para proteger /admin
     ],
 };
+
