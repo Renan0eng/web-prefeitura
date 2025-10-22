@@ -1,91 +1,111 @@
-// components/form-builder/FormBuilderPage.tsx
-
+// views/form-builder/FormBuilderPage.tsx
 'use client';
 
+import api from '@/services/api';
 import { FormQuestion, FormState } from '@/types/form-builder';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Save } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { QuestionCard } from './QuestionCard'; // Importe o novo componente
+import { QuestionCard } from './QuestionCard';
 
-export const FormBuilderPage = () => {
+interface FormBuilderPageProps {
+    formId?: string; 
+}
+
+const EMPTY_STATE: FormState = {
+    title: 'Formulário sem título',
+    description: '',
+    questions: [],
+};
+
+export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
+    const router = useRouter();
     const [isMounted, setIsMounted] = useState(false);
-    const [formState, setFormState] = useState<FormState>({
-        title: 'Formulário sem título',
-        description: '',
-        questions: [],
-    });
+    const [formState, setFormState] = useState<FormState>(EMPTY_STATE);
     const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
 
-    // ... (os dois useEffect para carregar e salvar no localStorage permanecem os mesmos) ...
-
+    // Efeito para buscar dados
     useEffect(() => {
-        try {
-            const savedForm = localStorage.getItem('formBuilderState');
-            if (savedForm) {
-                // AQUI ESTÁ A CORREÇÃO
-                const parsedForm = JSON.parse(savedForm) as FormState;
-                setFormState(parsedForm);
+        // Se NÃO houver formId, apenas carregamos o estado vazio.
+        if (!formId) {
+            setIsLoading(false);
+            setIsMounted(true);
+            return; // <--- Importante: para a execução
+        }
 
-                if (parsedForm.questions.length > 0) {
-                    setActiveQuestionId(parsedForm.questions[0].id);
+        // Se HOUVER formId, buscamos os dados
+        const fetchForm = async () => {
+            try {
+                setIsLoading(true);
+                const response = await api.get(`/forms/${formId}`);
+                const data = response.data;
+                setFormState(data);
+                if (data.questions.length > 0) {
+                    setActiveQuestionId(data.questions[0].id);
                 }
+            } catch (error) {
+                console.error("Falha ao carregar formulário:", error);
+                setFormState(EMPTY_STATE);
+            } finally {
+                setIsLoading(false);
+                setIsMounted(true);
+            }
+        };
+
+        fetchForm();
+    }, [formId]);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            if (formId) {
+                const response = await api.put(`/forms/${formId}`, formState);
+                const savedData = response.data;
+
+                setFormState(savedData);
+                console.log('Formulário ATUALIZADO!', savedData);
+
             } else {
-                // Se não houver nada salvo, carrega o estado inicial padrão
-                const initialQuestions = [
-                    { id: uuidv4(), text: 'Qual sua cor favorita?', type: 'MULTIPLE_CHOICE' as const, required: false, options: [{ id: uuidv4(), text: 'Azul' }, { id: uuidv4(), text: 'Verde' }] },
-                    { id: uuidv4(), text: 'Qual seu nome?', type: 'SHORT_TEXT' as const, required: true, options: [] },
-                ];
-                setFormState({
-                    title: 'Formulário sem título',
-                    description: '',
-                    questions: initialQuestions,
-                });
-                setActiveQuestionId(initialQuestions[0].id);
+                const response = await api.post(`/forms`, formState);
+                const newData = response.data;
+
+                console.log('Formulário CRIADO!', newData);
+
+                router.push(`/admin/ferramentas/formBuilder/${newData.id}`);
             }
         } catch (error) {
-            console.error("Failed to parse form state from localStorage", error);
+            console.error('Erro ao salvar:', error);
+        } finally {
+            setIsSaving(false);
         }
-        setIsMounted(true);
-    }, []);
+    };
 
-    useEffect(() => {
-        if (isMounted) {
-            localStorage.setItem('formBuilderState', JSON.stringify(formState));
-        }
-    }, [formState, isMounted]);
+
 
     const handleOnDragEnd = (result: DropResult) => {
         const { source, destination, type } = result;
-
         if (!destination) return;
-
-        // Lógica para reordenar as PERGUNTAS
         if (type === 'question') {
             const items = Array.from(formState.questions);
             const [reorderedItem] = items.splice(source.index, 1);
             items.splice(destination.index, 0, reorderedItem);
             setFormState({ ...formState, questions: items });
-            return; // Encerra a função aqui
+            return;
         }
-
-        // Lógica para reordenar as OPÇÕES DE RESPOSTA
         if (type === 'option') {
-            const questionId = source.droppableId; // O ID da área "droppable" da opção é o ID da pergunta
+            const questionId = source.droppableId;
             const question = formState.questions.find(q => q.id === questionId);
             if (!question) return;
-
-            // Reordena as opções dentro da pergunta encontrada
             const reorderedOptions = Array.from(question.options);
             const [movedOption] = reorderedOptions.splice(source.index, 1);
             reorderedOptions.splice(destination.index, 0, movedOption);
-
-            // Atualiza o estado global com a pergunta modificada
             const updatedQuestions = formState.questions.map(q =>
                 q.id === questionId ? { ...q, options: reorderedOptions } : q
             );
-
             setFormState({ ...formState, questions: updatedQuestions });
         }
     };
@@ -102,7 +122,6 @@ export const FormBuilderPage = () => {
             ...formState,
             questions: [...formState.questions, newQuestion],
         });
-        // Define a nova pergunta como ativa
         setActiveQuestionId(newQuestion.id);
     };
 
@@ -116,7 +135,6 @@ export const FormBuilderPage = () => {
     const deleteQuestion = (idToDelete: string) => {
         const newQuestions = formState.questions.filter(q => q.id !== idToDelete);
         setFormState({ ...formState, questions: newQuestions });
-        // Se o card deletado era o ativo, desativa
         if (activeQuestionId === idToDelete) {
             setActiveQuestionId(null);
         }
@@ -125,34 +143,46 @@ export const FormBuilderPage = () => {
     const duplicateQuestion = (idToDuplicate: string) => {
         const questionToDuplicate = formState.questions.find(q => q.id === idToDuplicate);
         if (!questionToDuplicate) return;
-
         const newQuestion: FormQuestion = {
             ...questionToDuplicate,
             id: uuidv4(),
             options: questionToDuplicate.options.map(opt => ({ ...opt, id: uuidv4() }))
         };
-
         const originalIndex = formState.questions.findIndex(q => q.id === idToDuplicate);
         const newQuestions = [...formState.questions];
         newQuestions.splice(originalIndex + 1, 0, newQuestion);
-
         setFormState({ ...formState, questions: newQuestions });
         setActiveQuestionId(newQuestion.id);
     };
 
-    if (!isMounted) return null;
+    if (!isMounted || isLoading) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                Carregando construtor...
+            </div>
+        );
+    }
 
     return (
         <div className=" min-h-screen p-8" onClick={() => setActiveQuestionId(null)}>
-            {/* Barra de Ferramentas Flutuante */}
+            <div className="fixed top-4 right-8 z-50">
+                <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="bg-primary text-white px-6 py-2 rounded-lg shadow-md hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
+                >
+                    <Save size={18} />
+                    {isSaving ? 'Salvando...' : 'Salvar'}
+                </button>
+            </div>
+
             <div className="fixed right-10 top-1/3 bg-background-foreground p-2 rounded-lg shadow-lg border">
-                <button onClick={addQuestion} className="p-2 hover:bg-gray-100 rounded-full">
+                <button onClick={(e) => { e.stopPropagation(); addQuestion(); }} className="p-2 hover:bg-gray-100 rounded-full">
                     <PlusCircle className="text-gray-600" />
                 </button>
             </div>
 
             <div className="max-w-3xl mx-auto">
-                {/* Cabeçalho do Formulário */}
                 <div className="bg-background-foreground p-6 rounded-lg shadow-md border-t-8 border-primary mb-6">
                     <input
                         type="text"
@@ -168,7 +198,6 @@ export const FormBuilderPage = () => {
                     />
                 </div>
 
-                {/* Lista de Perguntas */}
                 <DragDropContext onDragEnd={handleOnDragEnd}>
                     <Droppable droppableId="questions" type="question">
                         {(provided) => (

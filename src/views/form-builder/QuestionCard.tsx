@@ -1,11 +1,11 @@
-// components/form-builder/QuestionCard.tsx
+// views/form-builder/QuestionCard.tsx
 
 import { FormQuestion, FormQuestionOption, QuestionType } from '@/types/form-builder';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import clsx from 'clsx';
 import { Copy, GripHorizontal, GripVertical, Trash2, X } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 
 interface QuestionCardProps {
     question: FormQuestion;

@@ -23,8 +23,12 @@ export const data = {
         //   url: "/ferramentas/scrumboard",
         // },
         {
-          title: "Form Builder",
-          url: "admin/ferramentas/formBuilder",
+          title: "Criar Formulário",
+          url: "/admin/ferramentas/formBuilder",
+        },
+        {
+          title: "Listar Formulários",
+          url: "/admin/ferramentas/formList",
         },
       ],
     },
