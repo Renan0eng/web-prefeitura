@@ -74,6 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       } catch (err) {
         console.error("Nenhuma sessão válida encontrada.", err)
+        router.push('/auth/login')
         setUser(null)
         setAccessToken(null)
       } finally {

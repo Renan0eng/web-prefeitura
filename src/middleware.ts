@@ -12,15 +12,15 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/admin', request.url));
     }
 
-    const sessionCookie = request.cookies.get(COOKIE_NAME);
+    // const sessionCookie = request.cookies.get(COOKIE_NAME);
 
-    if (!sessionCookie) {
-        const loginUrl = new URL('/auth/login', request.url);
+    // if (!sessionCookie) {
+    //     const loginUrl = new URL('/auth/login', request.url);
 
-        loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
+    //     loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
 
-        return NextResponse.redirect(loginUrl);
-    }
+    //     return NextResponse.redirect(loginUrl);
+    // }
 
     return NextResponse.next();
 }
@@ -28,7 +28,7 @@ export function middleware(request: NextRequest) {
 export const config = {
     matcher: [
         '/',           // para redirecionar a raiz
-        '/admin/:path*', // para proteger /admin
+        // '/admin/:path*', // para proteger /admin
     ],
 };
 
