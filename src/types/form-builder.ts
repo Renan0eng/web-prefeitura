@@ -21,3 +21,48 @@ export interface FormState {
   description: string;
   questions: FormQuestion[];
 }
+
+// Tipo para o usuário que respondeu
+export interface FormSubmitter {
+  idUser: string;
+  name: string;
+  email: string;
+}
+
+// Tipo para a lista de respostas (Tela 1)
+export interface FormResponseSummary {
+  id: string; // ID da Response
+  submittedAt: string;
+  user: FormSubmitter | null;
+}
+
+// Tipo para o formulário na lista
+export interface FormWithResponses {
+  id: string;
+  title: string;
+  responses: FormResponseSummary[];
+}
+
+// Tipo para a resposta individual (Tela 2)
+export interface ResponseAnswerDetail {
+  id: string;
+  value: string | null;
+  values: string[];
+  question: {
+    id: string;
+    text: string;
+    type: QuestionType;
+  };
+}
+
+// Tipo para o detalhe da resposta (Tela 2)
+export interface FormResponseDetail {
+  id: string;
+  submittedAt: string;
+  user: FormSubmitter | null;
+  form: {
+    id: string;
+    title: string;
+  };
+  answers: ResponseAnswerDetail[];
+}
