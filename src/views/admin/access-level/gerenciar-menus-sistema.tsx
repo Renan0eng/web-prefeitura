@@ -1,4 +1,5 @@
 "use client"
+// src/views/admin/access-level/gerenciar-menus-sistema.tsx
 
 import { MenuAcessoDialog } from "@/components/access-level/menu-acesso-dialog"
 import { Badge } from "@/components/ui/badge"

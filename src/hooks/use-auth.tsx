@@ -1,4 +1,6 @@
 "use client"
+// src/hooks/use-auth.tsx
+
 import { useRouter } from "next/navigation"
 import React, { createContext, useContext, useEffect, useState } from "react"
 import api from "../services/api"

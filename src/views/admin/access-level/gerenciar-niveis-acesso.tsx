@@ -1,4 +1,5 @@
 "use client"
+// src/views/admin/access-level/gerenciar-niveis-acesso.tsx
 
 import { NivelAcessoDialog } from "@/components/access-level/nivel-acesso-dialog"
 import { Badge } from "@/components/ui/badge"

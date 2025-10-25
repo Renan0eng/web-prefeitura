@@ -1,4 +1,5 @@
 "use client"
+// src/views/admin/access-level/gerenciar-atribuicao-usuarios.tsx
 
 import { UsuarioNivelDialog } from "@/components/access-level/usuario-nivel-dialog"
 import { Badge } from "@/components/ui/badge"
@@ -53,10 +54,12 @@ export function GerenciarAtribuicaoUsuarios() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Atribuição de Usuários</CardTitle>
-                <CardDescription>
-                    Atribua um nível de acesso para cada usuário do sistema.
-                </CardDescription>
+                <div>
+                    <CardTitle>Atribuição de Usuários</CardTitle>
+                    <CardDescription>
+                        Atribua um nível de acesso para cada usuário do sistema.
+                    </CardDescription>
+                </div>
             </CardHeader>
             <CardContent>
                 {isLoading && <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />}

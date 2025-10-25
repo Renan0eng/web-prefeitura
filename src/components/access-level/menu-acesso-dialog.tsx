@@ -1,4 +1,5 @@
 "use client"
+// src/components/access-level/menu-nivel-dialog.tsx
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
