@@ -1,8 +1,9 @@
 import {
+  UserCheck,
   Wrench
 } from "lucide-react";
 
-const levels = ["ferramentas"]
+const levels = ["ferramentas", "acesso"]
 
 export const data = {
   user: {
@@ -31,6 +32,13 @@ export const data = {
           url: "/admin/ferramentas/formList",
         },
       ],
+    },
+    {
+      title: "Controle de Acesso",
+      url: "/admin/acessos",
+      icon: UserCheck,
+      isActive: false,
+      nivel_acesso: "acesso",
     },
   ],
   flow: [
