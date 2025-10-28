@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"; // <-- Importe o Label correto
+import { Label } from "@/components/ui/label"
 import { useAlert } from "@/hooks/use-alert"
 import api from "@/services/api"
 import { MenuAcesso } from "@/types/access-level"
@@ -16,7 +16,6 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-// Schema do Zod para o formulário
 const menuAcessoSchema = z.object({
     nome: z.string().min(3, "O nome é obrigatório."),
     slug: z.string().min(3, "O slug é obrigatório (ex: 'meu-menu')."),

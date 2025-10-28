@@ -14,9 +14,7 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-// Schema para o formulário
 const formSchema = z.object({
-  // O Select do Shadcn usa strings para seus valores
   nivelAcessoId: z.string().min(1, "Selecione um nível de acesso."),
 })
 type FormValues = z.infer<typeof formSchema>
@@ -47,7 +45,6 @@ export function UsuarioNivelDialog({
     },
   })
   
-  // Reseta o formulário se o usuário mudar
   React.useEffect(() => {
     form.reset({
       nivelAcessoId: String(user.nivel_acesso.idNivelAcesso),
@@ -58,7 +55,7 @@ export function UsuarioNivelDialog({
     setIsSubmitting(true)
     try {
       const payload = {
-        nivelAcessoId: parseInt(data.nivelAcessoId, 10), // Converte de volta para número
+        nivelAcessoId: parseInt(data.nivelAcessoId, 10),
       }
 
       await api.patch(`/admin/acesso/users/${user.idUser}/nivel`, payload)
@@ -99,7 +96,7 @@ export function UsuarioNivelDialog({
                       {niveisDisponiveis.map(nivel => (
                         <SelectItem
                           key={nivel.idNivelAcesso}
-                          value={String(nivel.idNivelAcesso)} // Valor deve ser string
+                          value={String(nivel.idNivelAcesso)}
                         >
                           {nivel.nome}
                         </SelectItem>

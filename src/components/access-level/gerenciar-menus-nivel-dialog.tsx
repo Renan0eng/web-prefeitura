@@ -16,7 +16,6 @@ import { z } from "zod"
 
 type NivelAcessoComMenus = NivelAcesso & { menus: MenuAcesso[] }
 
-// Schema para o formulário
 const formSchema = z.object({
     menuIds: z.array(z.number()),
 })
@@ -48,7 +47,6 @@ export function GerenciarMenusNivelDialog({
         },
     })
 
-    // Atualiza o form se o 'nivel' mudar
     React.useEffect(() => {
         form.reset({
             menuIds: nivel.menus.map(menu => menu.idMenuAcesso),
@@ -58,7 +56,6 @@ export function GerenciarMenusNivelDialog({
     async function onSubmit(data: FormValues) {
         setIsSubmitting(true)
         try {
-            // API para ATUALIZAR os menus de um nível
             await api.put(`/admin/acesso/niveis/${nivel.idNivelAcesso}/menus`, data)
             setAlert("Menus do nível atualizados!", "success")
             onDataChanged()

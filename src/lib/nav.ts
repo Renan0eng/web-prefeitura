@@ -1,4 +1,6 @@
 import {
+  Shield,
+  User,
   UserCheck,
   Wrench
 } from "lucide-react";
@@ -36,9 +38,23 @@ export const data = {
     {
       title: "Controle de Acesso",
       url: "/admin/acessos",
+      icon: Shield,
+      isActive: false,
+      nivel_acesso: "acesso",
+    },
+    {
+      title: "Ativação de Usuários",
+      url: "/admin/ativacao-usuarios",
       icon: UserCheck,
       isActive: false,
       nivel_acesso: "acesso",
+    },
+    {
+      title: "Usuários",
+      url: "/admin/usuarios",
+      icon: User,
+      isActive: false,
+      nivel_acesso: "gerenciar-usuarios",
     },
   ],
   flow: [

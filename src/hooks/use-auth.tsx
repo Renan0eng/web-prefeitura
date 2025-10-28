@@ -1,43 +1,44 @@
 "use client"
-// src/hooks/use-auth.tsx
 
-import { useRouter } from "next/navigation"
-import React, { createContext, useContext, useEffect, useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import api from "../services/api"
 import { useAlert } from "./use-alert"
 
-export type User =  {
-    nivel_acesso: {
-        menus: {
-            nome: string;
-            idMenuAcesso: number;
-            slug: string;
-            visualizar: boolean;
-            criar: boolean;
-            editar: boolean;
-            excluir: boolean;
-            relatorio: boolean;
-        }[];
-    } & {
-        idNivelAcesso: number;
-        nome: string;
-        descricao: string | null;
-    };
-    idUser: string;
-    name: string;
-    avatar: string | null;
-    email: string;
-    cpf: string | null;
-    cep: string | null;
-    phone: string | null;
-    user_id_create: number | null;
-    user_id_update: number | null;
-    user_id_delete: number | null;
-    dt_delete: Date | null;
-    created: Date;
-    updated: Date | null;
-    active: boolean;
-    nivelAcessoId: number;
+export type MenuPermission = {
+  nome: string;
+  idMenuAcesso: number;
+  slug: string;
+  visualizar: boolean;
+  criar: boolean;
+  editar: boolean;
+  excluir: boolean;
+  relatorio: boolean;
+}
+
+export type User = {
+  nivel_acesso: {
+    menus: MenuPermission[]; 
+  } & {
+    idNivelAcesso: number;
+    nome: string;
+    descricao: string | null;
+  };
+  idUser: string;
+  name: string;
+  avatar: string | null;
+  email: string;
+  cpf: string | null;
+  cep: string | null;
+  phone: string | null;
+  user_id_create: number | null;
+  user_id_update: number | null;
+  user_id_delete: number | null;
+  dt_delete: Date | null;
+  created: Date;
+  updated: Date | null;
+  active: boolean;
+  nivelAcessoId: number;
 }
 
 type AuthContextType = {
@@ -46,6 +47,7 @@ type AuthContextType = {
   loading: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
+  getPermissions: (slug: string) => MenuPermission | null;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType)
@@ -53,39 +55,38 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType)
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true) 
+  const [loading, setLoading] = useState(true)
   const { setAlert } = useAlert()
 
   const router = useRouter();
+
+  const path = usePathname();
 
   useEffect(() => {
     const loadSession = async () => {
       try {
         const { data: refreshData } = await api.post('/auth/refresh')
-        
         const newAccessToken = refreshData.accessToken
         setAccessToken(newAccessToken)
 
         const { data } = await api.get('/auth/me', {
-          headers: {
-            'Authorization': `Bearer ${newAccessToken}`
-          }
+          headers: { 'Authorization': `Bearer ${newAccessToken}` }
         })
-        
         setUser(data)
 
       } catch (err) {
         console.error("Nenhuma sessão válida encontrada.", err)
-        router.push('/auth/login')
+        if (path !== '/auth/login' && path !== '/auth/sign-up') {
+          router.push('/auth/login')
+        }
         setUser(null)
         setAccessToken(null)
       } finally {
         setLoading(false)
       }
     }
-
     loadSession()
-  }, []) 
+  }, [router])
 
   useEffect(() => {
     if (accessToken) {
@@ -93,7 +94,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       delete api.defaults.headers.common['Authorization']
     }
-  }, [accessToken]) 
+  }, [accessToken])
 
   const login = async (email: string, password: string) => {
     try {
@@ -103,28 +104,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(data.user)
       setAlert(`Bem-vindo(a), ${data.user.name}`, "success")
     } catch (err: any) {
-      setAlert( err.response.data.message || "Email ou senha inválidos", "error")
+      setAlert(err.response.data.message || "Email ou senha inválidos", "error")
       throw err
     }
   }
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout-web') 
+      await api.post('/auth/logout-web')
       setAlert("Você saiu com sucesso.", "success")
-      setUser(null)
-      setAccessToken(null)
-      router.push('/auth/login')
     } catch (err) {
       console.error("Erro ao invalidar sessão no backend", err)
     } finally {
       setAccessToken(null)
       setUser(null)
+      router.push('/auth/login')
     }
   }
 
+  const permissionsMap = useMemo(() => {
+    const map = new Map<string, MenuPermission>();
+    if (user?.nivel_acesso?.menus) {
+      for (const menu of user.nivel_acesso.menus) {
+        map.set(menu.slug, menu);
+      }
+    }
+    return map;
+  }, [user]); 
+
+  const getPermissions = useCallback((slug: string): MenuPermission | null => {
+    return permissionsMap.get(slug) || null;
+  }, [permissionsMap]);
+
   return (
-    <AuthContext.Provider value={{ user, accessToken, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, accessToken, loading, login, logout, getPermissions }}>
       {children}
     </AuthContext.Provider>
   )

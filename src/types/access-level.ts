@@ -15,6 +15,12 @@ export type MenuAcesso = {
   relatorio: boolean;
 }
 
+export enum EnumUserType {
+  ADMIN = "ADMIN",
+  USUARIO = "USUARIO",
+  PACIENTE = "PACIENTE"
+}
+
 export type User = {
   idUser: string;
   name: string;
@@ -27,6 +33,7 @@ export type User = {
   updated: string | null; 
   active: boolean;
   nivelAcessoId: number;
+  type: EnumUserType;
 }
 
 export type MenuAcessoComNiveis = MenuAcesso & {
@@ -36,3 +43,17 @@ export type MenuAcessoComNiveis = MenuAcesso & {
 export type UserComNivel = User & {
   nivel_acesso: NivelAcesso
 }
+
+export type UserFormData = {
+    name: string;
+    email: string;
+    password?: string; 
+    passwordConfirmation?: string;
+    avatar?: string | null;
+    cpf?: string | null;
+    cep?: string | null;
+    phone?: string | null;
+    nivelAcessoId: number;
+    type: EnumUserType;
+    active: boolean;
+};

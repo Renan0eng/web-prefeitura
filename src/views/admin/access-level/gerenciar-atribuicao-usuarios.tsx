@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAlert } from "@/hooks/use-alert"
+import { useAuth } from "@/hooks/use-auth"; // Importa
 import api from "@/services/api"
 import { NivelAcesso, UserComNivel } from "@/types/access-level"
 import { Edit, Loader2 } from "lucide-react"
@@ -20,6 +21,13 @@ export function GerenciarAtribuicaoUsuarios() {
     const [editingUser, setEditingUser] = React.useState<UserComNivel | null>(null)
 
     const { setAlert } = useAlert()
+    const { getPermissions } = useAuth() // Pega a função
+
+    // Define permissões
+    const permissions = React.useMemo(
+        () => getPermissions("acesso"),
+        [getPermissions]
+    )
 
     const fetchData = async () => {
         try {
@@ -51,6 +59,24 @@ export function GerenciarAtribuicaoUsuarios() {
         setIsDialogOpen(false) // Fecha o diálogo
     }
 
+    // Bloqueia a tela inteira se não tiver permissão de visualizar
+    if (isLoading) {
+        return <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+    }
+
+    if (!permissions?.visualizar) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Acesso Negado</CardTitle>
+                    <CardDescription>
+                        Você não tem permissão para visualizar esta seção.
+                    </CardDescription>
+                </CardHeader>
+            </Card>
+        )
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -62,49 +88,52 @@ export function GerenciarAtribuicaoUsuarios() {
                 </div>
             </CardHeader>
             <CardContent>
-                {isLoading && <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />}
-                {!isLoading && (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Usuário</TableHead>
-                                <TableHead>Nível de Acesso</TableHead>
-                                <TableHead>Status</TableHead>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Usuário</TableHead>
+                            <TableHead>Nível de Acesso</TableHead>
+                            <TableHead>Status</TableHead>
+                            {/* Controla a coluna de "Ações" */}
+                            {permissions?.editar && (
                                 <TableHead className="w-[64px] text-right">Ações</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {users.map((user) => (
-                                <TableRow key={user.idUser}>
-                                    <TableCell>
-                                        <div className="font-medium">{user.name}</div>
-                                        <div className="text-xs text-muted-foreground">{user.email}</div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={user.nivel_acesso.nome === 'Administrador' ? 'default' : 'secondary'}>
-                                            {user.nivel_acesso.nome}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        {user.active ? (
-                                            <Badge variant="outline" className="border-green-500 text-green-600">Ativo</Badge>
-                                        ) : (
-                                            <Badge variant="destructive">Inativo</Badge>
-                                        )}
-                                    </TableCell>
+                            )}
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {users.map((user) => (
+                            <TableRow key={user.idUser}>
+                                <TableCell>
+                                    <div className="font-medium">{user.name}</div>
+                                    <div className="text-xs text-muted-foreground">{user.email}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant={user.nivel_acesso.nome === 'Administrador' ? 'default' : 'secondary'}>
+                                        {user.nivel_acesso.nome}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    {user.active ? (
+                                        <Badge variant="outline" className="border-green-500 text-green-600">Ativo</Badge>
+                                    ) : (
+                                        <Badge variant="destructive">Inativo</Badge>
+                                    )}
+                                </TableCell>
+                                {/* Controla a célula de "Ações" */}
+                                {permissions?.editar && (
                                     <TableCell className="text-right">
                                         <Button variant="ghost" size="icon" onClick={() => handleEdit(user)}>
                                             <Edit className="h-4 w-4" />
                                         </Button>
                                     </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                )}
+                                )}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </CardContent>
 
-            {/* Diálogo para editar o nível do usuário */}
+            {/* Diálogo */}
             {editingUser && (
                 <UsuarioNivelDialog
                     isOpen={isDialogOpen}

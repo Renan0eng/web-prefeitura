@@ -1,5 +1,4 @@
 "use client"
-// src/views/admin/access-level/gerenciar-niveis-acesso.tsx
 
 import { NivelAcessoDialog } from "@/components/access-level/nivel-acesso-dialog"
 import { Badge } from "@/components/ui/badge"
@@ -7,9 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useAlert } from "@/hooks/use-alert"; // Seu hook de alerta
-import api from "@/services/api"; // Sua API
-import { MenuAcesso, NivelAcesso } from "@/types/access-level"; // Tipos do frontend
+import { useAlert } from "@/hooks/use-alert"
+import { useAuth } from "@/hooks/use-auth"; // Importa o useAuth
+import api from "@/services/api"
+import { MenuAcesso, NivelAcesso } from "@/types/access-level"
 import { Loader2, MoreHorizontal, PlusCircle } from "lucide-react"
 import * as React from "react"
 import { GerenciarMenusNivelDialog } from "../../../components/access-level/gerenciar-menus-nivel-dialog"
@@ -24,8 +24,16 @@ export function GerenciarNiveisAcesso() {
   const [isNivelDialogOpen, setIsNivelDialogOpen] = React.useState(false)
   const [isMenuDialogOpen, setIsMenuDialogOpen] = React.useState(false)
   const [editingNivel, setEditingNivel] = React.useState<NivelAcessoComMenus | null>(null)
-  
+
   const { setAlert } = useAlert()
+  const { getPermissions } = useAuth() // Pega a função de permissão
+
+  // Define o slug desta tela e busca as permissões
+  // (Assumindo "acesso" para a página inteira)
+  const permissions = React.useMemo(
+    () => getPermissions("acesso"),
+    [getPermissions]
+  )
 
   const fetchData = async () => {
     try {
@@ -80,6 +88,24 @@ export function GerenciarNiveisAcesso() {
     setIsMenuDialogOpen(false)
   }
 
+  // Bloqueia a tela inteira se não tiver permissão de visualizar
+  if (isLoading) {
+    return <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+  }
+
+  if (!permissions?.visualizar) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Acesso Negado</CardTitle>
+          <CardDescription>
+            Você não tem permissão para visualizar esta seção.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -89,37 +115,43 @@ export function GerenciarNiveisAcesso() {
             Crie os níveis (cargos) e gerencie quais menus eles podem acessar.
           </CardDescription>
         </div>
-        <Button onClick={handleAddNew}>
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Novo Nível
-        </Button>
+        {/* Controla o botão "Novo" */}
+        {permissions?.criar && (
+          <Button onClick={handleAddNew}>
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Novo Nível
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
-        {isLoading && <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />}
-        {!isLoading && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Menus Vinculados</TableHead>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Menus Vinculados</TableHead>
+              {/* Controla a coluna de "Ações" */}
+              {(permissions?.editar || permissions?.excluir) && (
                 <TableHead className="w-[64px] text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {niveis.map((nivel) => (
-                <TableRow key={nivel.idNivelAcesso}>
-                  <TableCell>
-                    <div className="font-medium">{nivel.nome}</div>
-                    <div className="text-xs text-muted-foreground">{nivel.descricao}</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {nivel.menus?.length === 0 && <span className="text-xs text-muted-foreground">Nenhum</span>}
-                      {nivel.menus?.map(menu => (
-                        <Badge key={menu.idMenuAcesso} variant="secondary">{menu.nome}</Badge>
-                      ))}
-                    </div>
-                  </TableCell>
+              )}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {niveis.map((nivel) => (
+              <TableRow key={nivel.idNivelAcesso}>
+                <TableCell>
+                  <div className="font-medium">{nivel.nome}</div>
+                  <div className="text-xs text-muted-foreground">{nivel.descricao}</div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1">
+                    {nivel.menus?.length === 0 && <span className="text-xs text-muted-foreground">Nenhum</span>}
+                    {nivel.menus?.map(menu => (
+                      <Badge key={menu.idMenuAcesso} variant="secondary">{menu.nome}</Badge>
+                    ))}
+                  </div>
+                </TableCell>
+                {/* Controla a célula de "Ações" */}
+                {(permissions?.editar || permissions?.excluir) && (
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -128,34 +160,39 @@ export function GerenciarNiveisAcesso() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleManageMenus(nivel)}>
-                          Gerenciar Menus
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(nivel)}>
-                          Editar Nível
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(nivel.idNivelAcesso)} className="text-destructive">
-                          Excluir
-                        </DropdownMenuItem>
+                        {/* Controla cada item do menu */}
+                        {permissions?.editar && (
+                          <DropdownMenuItem onClick={() => handleManageMenus(nivel)}>
+                            Gerenciar Menus
+                          </DropdownMenuItem>
+                        )}
+                        {permissions?.editar && (
+                          <DropdownMenuItem onClick={() => handleEdit(nivel)}>
+                            Editar Nível
+                          </DropdownMenuItem>
+                        )}
+                        {permissions?.excluir && (
+                          <DropdownMenuItem onClick={() => handleDelete(nivel.idNivelAcesso)} className="text-destructive">
+                            Excluir
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+                )}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </CardContent>
 
-      {/* Diálogo para Criar/Editar o Nível (nome, descrição) */}
+      {/* Diálogos */}
       <NivelAcessoDialog
         isOpen={isNivelDialogOpen}
         onOpenChange={setIsNivelDialogOpen}
         nivel={editingNivel}
         onDataChanged={onDataChanged}
       />
-
-      {/* Diálogo para Gerenciar Menus (vincular/desvincular) */}
       {editingNivel && (
         <GerenciarMenusNivelDialog
           isOpen={isMenuDialogOpen}

@@ -1,16 +1,18 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAlert } from "@/hooks/use-alert"
 import { cn } from "@/lib/utils"
 import { signUpSchema, SignUpSchema } from "@/schemas/login"
+import api from "@/services/api"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import Link from "next/link"
@@ -31,6 +33,8 @@ export function SignUpForm({
 
   const router = useRouter()
 
+    const { setAlert } = useAlert()
+
   const {
     register,
     handleSubmit,
@@ -43,16 +47,18 @@ export function SignUpForm({
   const onSubmit = async (data: SignUpSchema) => {
     try {
       const { confirmPassword, ...user } = data;
-
-      // const response = await createUser(user);
-
-      // if (response) {
-      //   router.push("/auth/login")
-      // } else {
-      //   alert("An error occurred during sign up.")
-      // }
+      api.post("/auth/register", user).then(() => {
+        setAlert("Cadastro realizado com sucesso! Por favor, faça o login.")
+        router.push("/auth/login")
+      }).catch((error: any) => {
+        if (error.response && error.response.data && error.response.data.message) {
+          setAlert(error.response.data.message, "error")
+        } else {
+          setAlert("Erro ao cadastrar. Por favor, tente novamente.", "error")
+        }
+      });
     } catch (err) {
-      alert("An unexpected error occurred. Please try again.")
+      setAlert("Erro ao cadastrar. Por favor, tente novamente.", "error")
     }
   }
 

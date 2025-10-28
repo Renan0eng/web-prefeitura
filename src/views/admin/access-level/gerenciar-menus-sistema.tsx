@@ -1,5 +1,4 @@
 "use client"
-// src/views/admin/access-level/gerenciar-menus-sistema.tsx
 
 import { MenuAcessoDialog } from "@/components/access-level/menu-acesso-dialog"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAlert } from "@/hooks/use-alert"
+import { useAuth } from "@/hooks/use-auth"; // Importa
 import api from "@/services/api"
 import { MenuAcesso } from "@/types/access-level"
 import { Loader2, MoreHorizontal, PlusCircle } from "lucide-react"
@@ -20,6 +20,13 @@ export function GerenciarMenusSistema() {
     const [editingMenu, setEditingMenu] = React.useState<MenuAcesso | null>(null)
 
     const { setAlert } = useAlert()
+    const { getPermissions } = useAuth() // Pega a função
+
+    // Define permissões
+    const permissions = React.useMemo(
+        () => getPermissions("acesso"),
+        [getPermissions]
+    )
 
     const fetchData = async () => {
         try {
@@ -58,6 +65,24 @@ export function GerenciarMenusSistema() {
         }
     }
 
+    // Bloqueia a tela inteira se não tiver permissão de visualizar
+    if (isLoading) {
+        return <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+    }
+
+    if (!permissions?.visualizar) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Acesso Negado</CardTitle>
+                    <CardDescription>
+                        Você não tem permissão para visualizar esta seção.
+                    </CardDescription>
+                </CardHeader>
+            </Card>
+        )
+    }
+
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -67,38 +92,44 @@ export function GerenciarMenusSistema() {
                         Crie os menus e defina suas permissões base.
                     </CardDescription>
                 </div>
-                <Button onClick={handleAddNew}>
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Novo Menu
-                </Button>
+                {/* Controla o botão "Novo" */}
+                {permissions?.criar && (
+                    <Button onClick={handleAddNew}>
+                        <PlusCircle className="w-4 h-4 mr-2" />
+                        Novo Menu
+                    </Button>
+                )}
             </CardHeader>
             <CardContent>
-                {isLoading && <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />}
-                {!isLoading && (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Menu (Slug)</TableHead>
-                                <TableHead>Permissões Base</TableHead>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Menu (Slug)</TableHead>
+                            <TableHead>Permissões Base</TableHead>
+                            {/* Controla a coluna de "Ações" */}
+                            {(permissions?.editar || permissions?.excluir) && (
                                 <TableHead className="w-[64px] text-right">Ações</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {menus.map((menu) => (
-                                <TableRow key={menu.idMenuAcesso}>
-                                    <TableCell>
-                                        <div className="font-medium">{menu.nome}</div>
-                                        <div className="text-xs text-muted-foreground">{menu.slug}</div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-wrap gap-1">
-                                            {menu.visualizar && <Badge variant="outline">Ver</Badge>}
-                                            {menu.criar && <Badge variant="outline">Criar</Badge>}
-                                            {menu.relatorio && <Badge variant="outline">Relatório</Badge>}
-                                            {menu.editar && <Badge variant="outline" className="border-blue-500 text-blue-600">Editar</Badge>}
-                                            {menu.excluir && <Badge variant="outline" className="border-red-500 text-red-500">Excluir</Badge>}
-                                        </div>
-                                    </TableCell>
+                            )}
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {menus.map((menu) => (
+                            <TableRow key={menu.idMenuAcesso}>
+                                <TableCell>
+                                    <div className="font-medium">{menu.nome}</div>
+                                    <div className="text-xs text-muted-foreground">{menu.slug}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex flex-wrap gap-1">
+                                        {menu.visualizar && <Badge variant="outline">Ver</Badge>}
+                                        {menu.criar && <Badge variant="outline">Criar</Badge>}
+                                        {menu.relatorio && <Badge variant="outline">Relatório</Badge>}
+                                        {menu.editar && <Badge variant="outline" className="border-blue-500 text-blue-600">Editar</Badge>}
+                                        {menu.excluir && <Badge variant="outline" className="border-red-500 text-red-500">Excluir</Badge>}
+                                    </div>
+                                </TableCell>
+                                {/* Controla a célula de "Ações" */}
+                                {(permissions?.editar || permissions?.excluir) && (
                                     <TableCell className="text-right">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
@@ -107,23 +138,28 @@ export function GerenciarMenusSistema() {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleEdit(menu)}>
-                                                    Editar Permissões
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleDelete(menu.idMenuAcesso)} className="text-destructive">
-                                                    Excluir
-                                                </DropdownMenuItem>
+                                                {/* Controla cada item */}
+                                                {permissions?.editar && (
+                                                    <DropdownMenuItem onClick={() => handleEdit(menu)}>
+                                                        Editar Permissões
+                                                    </DropdownMenuItem>
+                                                )}
+                                                {permissions?.excluir && (
+                                                    <DropdownMenuItem onClick={() => handleDelete(menu.idMenuAcesso)} className="text-destructive">
+                                                        Excluir
+                                                    </DropdownMenuItem>
+                                                )}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                )}
+                                )}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </CardContent>
 
-            {/* Diálogo para Criar/Editar o Menu e suas permissões */}
+            {/* Diálogo */}
             <MenuAcessoDialog
                 isOpen={isDialogOpen}
                 onOpenChange={setIsDialogOpen}
