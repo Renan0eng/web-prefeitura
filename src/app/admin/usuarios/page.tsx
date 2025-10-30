@@ -36,10 +36,6 @@ export default function UsuariosPage() {
                 api.get('/admin/users'), // Rota do UserController
                 api.get('/admin/acesso/niveis') // Rota do AcessoController
             ])
-
-            console.log("Users fetched:", usersResponse.data)
-            console.log("Access levels fetched:", niveisResponse.data)
-
             setUsers(usersResponse.data)
             setNiveis(niveisResponse.data)
         } catch (err: any) {
@@ -62,7 +58,7 @@ export default function UsuariosPage() {
     }
 
     const handleEdit = (user: UserComNivel) => {
-        setEditingUser(user) 
+        setEditingUser(user)
         setIsDialogOpen(true)
     }
 
@@ -83,6 +79,14 @@ export default function UsuariosPage() {
         fetchData()
     }
 
+    if (isLoading) { // Mostra loading enquanto busca permissões
+        return (
+            <div className="container mx-auto p-4 md:p-8 flex justify-center items-center h-[300px]">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        )
+    }
+
 
     if (!permissions?.visualizar) {
         return (
@@ -99,13 +103,6 @@ export default function UsuariosPage() {
         )
     }
 
-    if (isLoading) { // Mostra loading enquanto busca permissões
-        return (
-            <div className="container mx-auto p-4 md:p-8 flex justify-center items-center h-[300px]">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-        )
-    }
     return (
         <div className="container mx-auto p-4 md:p-8">
             <h1 className="text-3xl font-bold tracking-tight mb-6">
@@ -167,24 +164,30 @@ export default function UsuariosPage() {
                                         {(permissions?.editar || permissions?.excluir) && (
                                             <TableCell className="text-right">
                                                 <DropdownMenu>
-                                                    <DropdownMenuTrigger>
-                                                        <Button variant="ghost" size="icon"  className="rounded-full">
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="rounded-full">
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        {permissions?.editar && (
-                                                            <DropdownMenuItem onClick={() => handleEdit(user)}>
-                                                                Editar
-                                                            </DropdownMenuItem>
-                                                        )}
-                                                        {permissions?.excluir && (
-                                                            <DropdownMenuItem onClick={() => handleDelete(user)} className="text-destructive">
-                                                                Excluir
-                                                            </DropdownMenuItem>
-                                                        )}
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                setTimeout(() => handleEdit(user), 50) // força fechamento do dropdown antes
+                                                            }}
+                                                        >
+                                                            Editar
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                setTimeout(() => handleDelete(user), 50)
+                                                            }}
+                                                            className="text-destructive"
+                                                        >
+                                                            Excluir
+                                                        </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
+
                                             </TableCell>
                                         )}
                                     </TableRow>

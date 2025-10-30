@@ -83,7 +83,6 @@ export default function FormListPage() {
             //   await api.delete(`/forms/${formId}`);
             //   setForms(forms.filter(f => f.id !== formId));
             // } catch (err) { ... }
-            console.log(`Implementar lógica para excluir o formulário ${formId}`);
         }
     };
 

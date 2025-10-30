@@ -6,8 +6,6 @@ const COOKIE_NAME = 'refresh_token';
 export function middleware(request: NextRequest) {
 
     // se a rota for / redireciona para /admin
-    console.log("request.nextUrl.pathname", request.nextUrl.pathname);
-    
     if (request.nextUrl.pathname === '/') {
         return NextResponse.redirect(new URL('/admin', request.url));
     }

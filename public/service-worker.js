@@ -3,19 +3,16 @@ const OFFLINE_URL = '/offline.html';
 
 // INSTALAÇÃO (sem cache inicial)
 self.addEventListener('install', (event) => {
-  console.log('[SW] Instalando...');
   self.skipWaiting(); // opcional: ativa imediatamente
 });
 
 // ATIVAÇÃO: limpeza de caches antigos
 // self.addEventListener('activate', (event) => {
-//   console.log('[SW] Ativando...');
 //   event.waitUntil(
 //     caches.keys().then((keyList) =>
 //       Promise.all(
 //         keyList.map((key) => {
 //           if (key !== CACHE_NAME) {
-//             console.log('[SW] Deletando cache antigo:', key);
 //             return caches.delete(key);
 //           }
 //         })

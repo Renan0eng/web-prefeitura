@@ -65,16 +65,10 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
             if (formId) {
                 const response = await api.put(`/forms/${formId}`, formState);
                 const savedData = response.data;
-
                 setFormState(savedData);
-                console.log('Formulário ATUALIZADO!', savedData);
-
             } else {
                 const response = await api.post(`/forms`, formState);
                 const newData = response.data;
-
-                console.log('Formulário CRIADO!', newData);
-
                 router.push(`/admin/ferramentas/formBuilder/${newData.id}`);
             }
         } catch (error) {

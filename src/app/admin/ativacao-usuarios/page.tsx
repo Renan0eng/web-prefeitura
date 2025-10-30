@@ -28,7 +28,6 @@ export default function AtivacaoUsuariosPage() {
         try {
             setIsLoading(true)
             const usersResponse = await api.get('/admin/acesso/users')
-            console.log(usersResponse.data);
             setUsers(usersResponse.data)
         } catch (err: any) {
             setAlert(err.response?.data?.message || "Erro ao carregar usuários.", "error")
