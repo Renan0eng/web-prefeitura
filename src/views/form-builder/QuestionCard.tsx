@@ -1,5 +1,9 @@
 // views/form-builder/QuestionCard.tsx
 
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { FormQuestion, FormQuestionOption, QuestionType } from '@/types/form-builder';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import clsx from 'clsx';
@@ -42,26 +46,33 @@ export const QuestionCard = ({
 
     const handleOptionTextChange = (optionId: string, text: string) => {
         const newOptions = question.options.map(opt =>
-            opt.id === optionId ? { ...opt, text } : opt
+            opt.idOption === optionId ? { ...opt, text } : opt
+        );
+        updateQuestion({ ...question, options: newOptions });
+    };
+
+    const handleOptionValueChange = (optionId: string, value: string) => {
+        const newOptions = question.options.map(opt =>
+            opt.idOption === optionId ? { ...opt, value: parseFloat(value) } : opt
         );
         updateQuestion({ ...question, options: newOptions });
     };
 
     const addOption = () => {
-        const newOption: FormQuestionOption = { id: uuidv4(), text: `Opção ${question.options.length + 1}` };
+        const newOption: FormQuestionOption = { idOption: uuidv4(), text: `Opção ${question.options.length + 1}` };
         const newOptions = [...question.options, newOption];
         updateQuestion({ ...question, options: newOptions });
     };
 
     const removeOption = (optionId: string) => {
-        const newOptions = question.options.filter(opt => opt.id !== optionId);
+        const newOptions = question.options.filter(opt => opt.idOption !== optionId);
         updateQuestion({ ...question, options: newOptions });
     };
 
     const showOptions = question.type === 'MULTIPLE_CHOICE' || question.type === 'CHECKBOXES';
 
     return (
-        <Draggable draggableId={question.id} index={index}>
+        <Draggable draggableId={question.idQuestion} index={index}>
             {(provided, snapshot) => (
                 <div
                     ref={provided.innerRef}
@@ -82,7 +93,7 @@ export const QuestionCard = ({
                     </div>
 
                     {/* Cabeçalho da Pergunta (Input de texto e Seletor de tipo) */}
-                    <div className="pt-6 flex justify-between items-start gap-4">
+                    <div className="pt-6 flex justify-between items-start gap-4 sm:flex-row flex-col">
                         <input
                             type="text"
                             value={question.text}
@@ -91,8 +102,8 @@ export const QuestionCard = ({
                             placeholder="Pergunta"
                         />
                         {isActive && (
-                            <Select value={question.type} onValueChange={handleTypeChange}>
-                                <SelectTrigger className="w-[240px] bg-background-foreground">
+                            <Select value={question.type} onValueChange={handleTypeChange} >
+                                <SelectTrigger className="sm:w-[240px] w-full bg-background-foreground">
                                     <div className="flex items-center">
                                         <SelectValue placeholder="Tipo de pergunta" />
                                     </div>
@@ -103,7 +114,7 @@ export const QuestionCard = ({
                                             Múltipla escolha
                                         </div>
                                     </SelectItem>
-                                    <SelectItem value="SHORT_TEXT">
+                                    {/* <SelectItem value="SHORT_TEXT">
                                         <div className="flex items-center">
                                             Resposta curta
                                         </div>
@@ -112,7 +123,7 @@ export const QuestionCard = ({
                                         <div className="flex items-center">
                                             Parágrafo
                                         </div>
-                                    </SelectItem>
+                                    </SelectItem> */}
                                     <SelectItem value="CHECKBOXES">
                                         <div className="flex items-center">
                                             Caixas de seleção
@@ -126,31 +137,57 @@ export const QuestionCard = ({
                     {/* Corpo da Pergunta (Opções ou Placeholder) */}
                     <div className="mt-4">
                         {showOptions ? (
-                            <Droppable droppableId={question.id} type="option">
+                            <Droppable droppableId={question.idQuestion} type="option">
                                 {(droppableProvided) => (
                                     <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps} className="space-y-3">
                                         {question.options.map((option, optionIndex) => (
-                                            <Draggable key={option.id} draggableId={option.id} index={optionIndex}>
+                                            <Draggable key={option.idOption} draggableId={option.idOption} index={optionIndex}>
                                                 {(draggableProvided) => (
                                                     <div
                                                         ref={draggableProvided.innerRef}
                                                         {...draggableProvided.draggableProps}
                                                         className="flex items-center group gap-2"
                                                     >
-                                                        <div {...draggableProvided.dragHandleProps} className="cursor-grab text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {/* Alça de arraste da Opção */}
+                                                        <div {...draggableProvided.dragHandleProps} className="cursor-grab text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <GripVertical size={20} />
                                                         </div>
-                                                        <input type={question.type === 'MULTIPLE_CHOICE' ? 'radio' : 'checkbox'} disabled className="mr-1" />
-                                                        <input
-                                                            type="text"
-                                                            value={option.text}
-                                                            onChange={(e) => handleOptionTextChange(option.id, e.target.value)}
-                                                            className="w-full border-b border-gray-200 focus:border-gray-400 bg-transparent outline-none py-1"
-                                                        />
+
+                                                        {/* Input Visual (Radio ou Checkbox) */}
+                                                        {question.type === 'MULTIPLE_CHOICE' ? (
+                                                            <RadioGroup>
+                                                                <RadioGroupItem value={option.idOption} disabled className="mr-1" />
+                                                            </RadioGroup>
+                                                        ) : (
+                                                            <Checkbox id={`cb-${option.idOption}`} disabled className="mr-1" />
+                                                        )}
+
+                                                        {/* Input de Texto da Opção */}
+                                                        
+                                                        <div className='flex w-full items-center border-b-2 border-gray-200 focus-within:border-primary transition-colors'>
+                                                            <Input
+                                                                type="text"
+                                                                placeholder='Opção X'
+                                                                value={option.text}
+                                                                onChange={(e) => handleOptionTextChange(option.idOption, e.target.value)}
+                                                                className="w-full border-gray-200 border-0 bg-transparent outline-none rounded-none pb-1 placeholder:text-gray-400"
+                                                            />
+                                                            {/* Input de numero value */}
+                                                            <Input
+                                                                type="number"
+                                                                placeholder='Valor'
+                                                                value={option.value || undefined}
+                                                                onChange={(e) => handleOptionValueChange(option.idOption, e.target.value)}
+                                                                className="w-[80px] border-gray-200 border-0 bg-transparent outline-none rounded-none pb-1 placeholder:text-gray-400 no-arrows text-right"
+                                                            />
+                                                        </div>
+
+
+                                                        {/* Botão Remover Opção */}
                                                         {question.options.length > 1 && (
-                                                            <button onClick={() => removeOption(option.id)} className="ml-2 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Button variant="ghost" size="icon" onClick={() => removeOption(option.idOption)} className="ml-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent">
                                                                 <X size={20} />
-                                                            </button>
+                                                            </Button>
                                                         )}
                                                     </div>
                                                 )}
@@ -168,8 +205,16 @@ export const QuestionCard = ({
 
                         {showOptions && isActive && (
                             <div className="mt-4 flex items-center pl-8">
-                                <input type={question.type === 'MULTIPLE_CHOICE' ? 'radio' : 'checkbox'} disabled className="mr-3" />
-                                <button onClick={addOption} className="text-primary hover:underline">Adicionar opção</button>
+                                {question.type === 'MULTIPLE_CHOICE' ? (
+                                    <RadioGroup>
+                                        <RadioGroupItem value="add" disabled className="mr-3" />
+                                    </RadioGroup>
+                                ) : (
+                                    <Checkbox id="cb-add" disabled className="mr-3" />
+                                )}
+                                <Button variant="link" onClick={addOption} className="text-primary p-0 h-auto">
+                                    Adicionar opção
+                                </Button>
                             </div>
                         )}
                     </div>

@@ -11,7 +11,7 @@ const inputBaseClass = "w-full p-2 border border-gray-300 rounded-md focus:outli
 const questionTitleClass = "text-lg font-medium mb-2";
 
 export const QuestionRenderer = ({ question, value, onChange }: QuestionRendererProps) => {
-    const { id, text, type, options, required } = question;
+    const { idQuestion, text, type, options, required } = question;
 
     const renderQuestionInput = () => {
         switch (type) {
@@ -21,7 +21,7 @@ export const QuestionRenderer = ({ question, value, onChange }: QuestionRenderer
                         type="text"
                         className={inputBaseClass}
                         value={value as string}
-                        onChange={(e) => onChange(id, e.target.value)}
+                        onChange={(e) => onChange(idQuestion, e.target.value)}
                         required={required}
                         placeholder="Sua resposta"
                     />
@@ -34,7 +34,7 @@ export const QuestionRenderer = ({ question, value, onChange }: QuestionRenderer
                         className={inputBaseClass}
                         rows={4}
                         value={value as string}
-                        onChange={(e) => onChange(id, e.target.value)}
+                        onChange={(e) => onChange(idQuestion, e.target.value)}
                         required={required}
                         placeholder="Sua resposta longa"
                     />
@@ -44,13 +44,13 @@ export const QuestionRenderer = ({ question, value, onChange }: QuestionRenderer
                 return (
                     <div className="space-y-2">
                         {options?.map((option) => (
-                            <label key={option.id} className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-50">
+                            <label key={option.idOption} className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-50">
                                 <input
                                     type="radio"
-                                    name={id} // O name agrupa os radios
+                                    name={idQuestion} // O name agrupa os radios
                                     value={option.text}
                                     checked={value === option.text}
-                                    onChange={(e) => onChange(id, e.target.value)}
+                                    onChange={(e) => onChange(idQuestion, e.target.value)}
                                     className="form-radio text-primary focus:ring-primary"
                                     required={required}
                                 />
@@ -67,13 +67,13 @@ export const QuestionRenderer = ({ question, value, onChange }: QuestionRenderer
                     const newValues = currentValues.includes(optionText)
                         ? currentValues.filter(v => v !== optionText)
                         : [...currentValues, optionText];
-                    onChange(id, newValues);
+                    onChange(idQuestion, newValues);
                 };
 
                 return (
                     <div className="space-y-2">
                         {options?.map((option) => (
-                            <label key={option.id} className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-50">
+                            <label key={option.idOption} className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-50">
                                 <input
                                     type="checkbox"
                                     value={option.text}

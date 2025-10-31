@@ -3,12 +3,13 @@
 import api from '@/services/api';
 import {
     AlertTriangle,
+    CalendarDays,
     Edit,
-    Eye,
     List,
+    ListChecks,
     MoreVertical,
     Plus,
-    Trash2,
+    Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -40,10 +41,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // Tipo para os dados que esperamos do back-end (GET /forms)
 type FormListItem = {
-    id: string;
+    idForm: string;
     title: string;
     description: string | null;
     updatedAt: string;
+    responses: number;
 };
 
 export default function FormListPage() {
@@ -51,8 +53,7 @@ export default function FormListPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // AJUSTE ESTE CAMINHO se o seu 'formBuilder' não estiver em /admin/ferramentas
-    const basePath = '/admin/ferramentas/formBuilder';
+    const basePath = '/admin/criar-formulario';
 
     useEffect(() => {
         const fetchForms = async () => {
@@ -126,13 +127,11 @@ export default function FormListPage() {
         return (
             <div className="space-y-4">
                 {forms.map(form => (
-                    <Card key={form.id}>
-                        {/* Usamos flex-row, items-center e space-y-0
-                        para alinhar o título e o botão de menu 
-                        */}
+                    <Card key={form.idForm}>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                             <div className="space-y-1.5">
-                                <CardTitle>{form.title}</CardTitle>
+                                {/* 1. Corrigido para text-primary semântico */}
+                                <CardTitle className='text-primary'>{form.title}</CardTitle>
                                 <CardDescription className="truncate max-w-lg">
                                     {form.description || 'Sem descrição'}
                                 </CardDescription>
@@ -140,42 +139,38 @@ export default function FormListPage() {
 
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className='hover:text-white rounded-full'>
+                                    {/* 2. Removido hover:text-white que conflitava com 'ghost' */}
+                                    <Button variant="ghost" size="icon" className='rounded-full'>
                                         <MoreVertical className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Ações</DropdownMenuLabel>
                                     <DropdownMenuSeparator />
-
-                                    {/* A prop `asChild` permite que o `Link`
-                                    receba toda a estilização e comportamento
-                                    do `DropdownMenuItem`.
-                                    */}
                                     <DropdownMenuItem asChild>
-                                        <Link href={`${basePath}/${form.id}`} className="cursor-pointer">
+                                        <Link href={`${basePath}/${form.idForm}`} className="cursor-pointer">
                                             <Edit className="mr-2 h-4 w-4" />
                                             <span>Editar Formulário</span>
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
-                                        <Link href={`${basePath}/${form.id}/respostas`} className="cursor-pointer">
-                                            <List className="mr-2 h-4 w-4" />
+                                        <Link href={`${basePath}/${form.idForm}/respostas`} className="cursor-pointer">
+                                            <ListChecks className="mr-2 h-4 w-4" />
                                             <span>Ver Respostas</span>
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
-                                        <Link href={`/forms/${form.id}`} target="_blank" className="cursor-pointer">
-                                            <Eye className="mr-2 h-4 w-4" />
-                                            <span>Visualizar (Público)</span>
+                                        <Link href={`/admin/responder-formulario/${form.idForm}`} className="cursor-pointer">
+                                            <List className="mr-2 h-4 w-4" />
+                                            <span>Responder Formulário</span>
                                         </Link>
                                     </DropdownMenuItem>
-
                                     <DropdownMenuSeparator />
 
+                                    {/* 3. Corrigido para "destructive" semântico */}
                                     <DropdownMenuItem
-                                        className="text-primary hover:bg-primary hover:text-white cursor-pointer"
-                                        onSelect={() => handleDelete(form.id)}
+                                        className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer"
+                                        onSelect={() => handleDelete(form.idForm)}
                                     >
                                         <Trash2 className="mr-2 h-4 w-4" />
                                         <span>Excluir</span>
@@ -184,12 +179,22 @@ export default function FormListPage() {
                             </DropdownMenu>
                         </CardHeader>
 
-                        <CardFooter>
-                            <p className="text-sm text-muted-foreground">
-                                Atualizado em: {new Date(form.updatedAt).toLocaleDateString('pt-BR', {
-                                    day: '2-digit', month: '2-digit', year: 'numeric'
-                                })}
-                            </p>
+                        {/* 4. Footer melhorado com ícones, flex e melhor texto */}
+                        <CardFooter className='flex justify-between text-sm text-muted-foreground'>
+                            <div className="flex items-center">
+                                <CalendarDays className="mr-1.5 h-3.5 w-3.5" />
+                                <span>
+                                    {new Date(form.updatedAt).toLocaleDateString('pt-BR', {
+                                        day: '2-digit', month: '2-digit', year: 'numeric'
+                                    })}
+                                </span>
+                            </div>
+                            <div className="flex items-center">
+                                <ListChecks className="mr-1.5 h-3.5 w-3.5" />
+                                <span>
+                                    {form.responses} {form.responses === 1 ? 'Resposta' : 'Respostas'}
+                                </span>
+                            </div>
                         </CardFooter>
                     </Card>
                 ))}

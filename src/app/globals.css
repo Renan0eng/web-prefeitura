@@ -133,3 +133,14 @@
   }
 }
 
+/* Esconde as setas em navegadores WebKit (Chrome, Safari, Edge, etc.) */
+.no-arrows::-webkit-outer-spin-button,
+.no-arrows::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Esconde as setas no Firefox */
+.no-arrows {
+  -moz-appearance: textfield;
+}

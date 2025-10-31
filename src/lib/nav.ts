@@ -1,11 +1,11 @@
 import {
+  ClipboardList,
   Shield,
   User,
-  UserCheck,
-  Wrench
+  UserCheck
 } from "lucide-react";
 
-const levels = ["ferramentas", "acesso"]
+const levels = ["acesso", "gerenciar-usuarios", "formulario"];
 
 export const data = {
   user: {
@@ -13,27 +13,15 @@ export const data = {
     email: "icarus@example.com",
     avatar: "/logo.webp"
   },
+  // listar-formulario
+  // criar-formulario
   navMain: [
     {
-      title: "Ferramentas",
-      url: "#",
-      icon: Wrench,
+      title: "Formulários",
+      url: "/admin/listar-formulario",
+      icon: ClipboardList,
       isActive: false,
-      nivel_acesso: "ferramentas",
-      items: [
-        // {
-        //   title: "Scrumboard",
-        //   url: "/ferramentas/scrumboard",
-        // },
-        {
-          title: "Criar Formulário",
-          url: "/admin/ferramentas/formBuilder",
-        },
-        {
-          title: "Listar Formulários",
-          url: "/admin/ferramentas/formList",
-        },
-      ],
+      nivel_acesso: "formulario",
     },
     {
       title: "Controle de Acesso",

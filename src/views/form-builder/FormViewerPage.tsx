@@ -33,7 +33,7 @@ export const FormViewerPage = ({ formId }: FormViewerPageProps) => {
                 // Inicializa o estado de respostas
                 const initialAnswers: AnswersState = {};
                 response.data.questions.forEach((q: FormQuestion) => {
-                    initialAnswers[q.id] = q.type === 'CHECKBOXES' ? [] : '';
+                    initialAnswers[q.idQuestion] = q.type === 'CHECKBOXES' ? [] : '';
                 });
                 setAnswers(initialAnswers);
             } catch (error) {
@@ -48,10 +48,10 @@ export const FormViewerPage = ({ formId }: FormViewerPageProps) => {
     }, [formId]);
 
     // 2. Handler para atualizar o estado de respostas
-    const handleAnswerChange = (questionId: string, value: string | string[]) => {
+    const handleAnswerChange = (questionidQuestion: string, value: string | string[]) => {
         setAnswers((prevAnswers) => ({
             ...prevAnswers,
-            [questionId]: value,
+            [questionidQuestion]: value,
         }));
     };
 
@@ -65,7 +65,7 @@ export const FormViewerPage = ({ formId }: FormViewerPageProps) => {
         if (formState) {
             for (const question of formState.questions) {
                 if (question.required) {
-                    const answer = answers[question.id];
+                    const answer = answers[question.idQuestion];
                     if (!answer || (Array.isArray(answer) && answer.length === 0)) {
                         setSubmitError(`A pergunta "${question.text || 'Sem título'}" é obrigatória.`);
                         setIsSubmitting(false);
@@ -131,9 +131,9 @@ export const FormViewerPage = ({ formId }: FormViewerPageProps) => {
                 <div className="space-y-6">
                     {formState.questions.map((question) => (
                         <QuestionRenderer
-                            key={question.id}
+                            key={question.idQuestion}
                             question={question}
-                            value={answers[question.id]}
+                            value={answers[question.idQuestion]}
                             onChange={handleAnswerChange}
                         />
                     ))}

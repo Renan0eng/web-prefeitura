@@ -1,15 +1,16 @@
 // types/form-builder.ts
 
 export interface FormQuestionOption {
-  id: string;
+  idOption: string;
   text: string;
+  value?: number | null;
 }
 
 // Expanda os tipos de pergunta aqui
 export type QuestionType = 'MULTIPLE_CHOICE' | 'SHORT_TEXT' | 'PARAGRAPH' | 'CHECKBOXES';
 
 export interface FormQuestion {
-  id: string;
+  idQuestion: string;
   text: string;
   type: QuestionType;
   required: boolean; // Nova propriedade!
@@ -31,37 +32,39 @@ export interface FormSubmitter {
 
 // Tipo para a lista de respostas (Tela 1)
 export interface FormResponseSummary {
-  id: string; // ID da Response
+  idResponse: string; // ID da Response
   submittedAt: string;
   user: FormSubmitter | null;
 }
 
 // Tipo para o formulário na lista
 export interface FormWithResponses {
-  id: string;
+  idForm: string;
   title: string;
   responses: FormResponseSummary[];
 }
 
 // Tipo para a resposta individual (Tela 2)
 export interface ResponseAnswerDetail {
-  id: string;
+  idResponse: string;
   value: string | null;
   values: string[];
+  score: number | null;
   question: {
-    id: string;
+    idQuestion: string;
     text: string;
+    value?: number | null;
     type: QuestionType;
   };
 }
 
 // Tipo para o detalhe da resposta (Tela 2)
 export interface FormResponseDetail {
-  id: string;
+  idResponse: string;
   submittedAt: string;
   user: FormSubmitter | null;
   form: {
-    id: string;
+    idForm: string;
     title: string;
   };
   answers: ResponseAnswerDetail[];

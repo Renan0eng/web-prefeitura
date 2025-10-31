@@ -53,8 +53,8 @@ export const ResponseListPage = ({ formId }: ResponseListPageProps) => {
                     <ul className="divide-y divide-gray-200">
                         {responses.map((response: FormResponseSummary) => (
                             <li
-                                key={response.id}
-                                onClick={() => router.push(`/admin/ferramentas/formBuilder/${formId}/respostas/${response.id}`)}
+                                key={response.idResponse}
+                                onClick={() => router.push(`/admin/criar-formulario/${formId}/respostas/${response.idResponse}`)}
                                 className="p-4 flex justify-between items-center hover:bg-gray-50 cursor-pointer"
                             >
                                 <div className="flex items-center gap-3">

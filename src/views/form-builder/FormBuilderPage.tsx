@@ -1,10 +1,11 @@
 // views/form-builder/FormBuilderPage.tsx
 'use client';
 
+import { Button } from '@/components/ui/button';
 import api from '@/services/api';
 import { FormQuestion, FormState } from '@/types/form-builder';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
-import { PlusCircle, Save } from 'lucide-react';
+import { PlusCircle, Save, Undo2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -69,7 +70,7 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
             } else {
                 const response = await api.post(`/forms`, formState);
                 const newData = response.data;
-                router.push(`/admin/ferramentas/formBuilder/${newData.id}`);
+                router.push(`/admin/criar-formulario/${newData.idForm}`);
             }
         } catch (error) {
             console.error('Erro ao salvar:', error);
@@ -92,13 +93,13 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
         }
         if (type === 'option') {
             const questionId = source.droppableId;
-            const question = formState.questions.find(q => q.id === questionId);
+            const question = formState.questions.find(q => q.idQuestion === questionId);
             if (!question) return;
             const reorderedOptions = Array.from(question.options);
             const [movedOption] = reorderedOptions.splice(source.index, 1);
             reorderedOptions.splice(destination.index, 0, movedOption);
             const updatedQuestions = formState.questions.map(q =>
-                q.id === questionId ? { ...q, options: reorderedOptions } : q
+                q.idQuestion === questionId ? { ...q, options: reorderedOptions } : q
             );
             setFormState({ ...formState, questions: updatedQuestions });
         }
@@ -106,28 +107,28 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
 
     const addQuestion = () => {
         const newQuestion: FormQuestion = {
-            id: uuidv4(),
+            idQuestion: uuidv4(),
             text: '',
             type: 'MULTIPLE_CHOICE',
-            options: [{ id: uuidv4(), text: 'Opção 1' }],
+            options: [{ idOption: uuidv4(), text: 'Opção 1', value: null }],
             required: false,
         };
         setFormState({
             ...formState,
             questions: [...formState.questions, newQuestion],
         });
-        setActiveQuestionId(newQuestion.id);
+        setActiveQuestionId(newQuestion.idQuestion);
     };
 
     const updateQuestion = (updatedQuestion: FormQuestion) => {
         const newQuestions = formState.questions.map(q =>
-            q.id === updatedQuestion.id ? updatedQuestion : q
+            q.idQuestion === updatedQuestion.idQuestion ? updatedQuestion : q
         );
         setFormState({ ...formState, questions: newQuestions });
     };
 
     const deleteQuestion = (idToDelete: string) => {
-        const newQuestions = formState.questions.filter(q => q.id !== idToDelete);
+        const newQuestions = formState.questions.filter(q => q.idQuestion !== idToDelete);
         setFormState({ ...formState, questions: newQuestions });
         if (activeQuestionId === idToDelete) {
             setActiveQuestionId(null);
@@ -135,18 +136,18 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
     };
 
     const duplicateQuestion = (idToDuplicate: string) => {
-        const questionToDuplicate = formState.questions.find(q => q.id === idToDuplicate);
+        const questionToDuplicate = formState.questions.find(q => q.idQuestion === idToDuplicate);
         if (!questionToDuplicate) return;
         const newQuestion: FormQuestion = {
             ...questionToDuplicate,
-            id: uuidv4(),
-            options: questionToDuplicate.options.map(opt => ({ ...opt, id: uuidv4() }))
+            idQuestion: uuidv4(),
+            options: questionToDuplicate.options.map(opt => ({ ...opt, idOption: uuidv4() }))
         };
-        const originalIndex = formState.questions.findIndex(q => q.id === idToDuplicate);
+        const originalIndex = formState.questions.findIndex(q => q.idQuestion === idToDuplicate);
         const newQuestions = [...formState.questions];
         newQuestions.splice(originalIndex + 1, 0, newQuestion);
         setFormState({ ...formState, questions: newQuestions });
-        setActiveQuestionId(newQuestion.id);
+        setActiveQuestionId(newQuestion.idQuestion);
     };
 
     if (!isMounted || isLoading) {
@@ -158,25 +159,32 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
     }
 
     return (
-        <div className=" min-h-screen p-8" onClick={() => setActiveQuestionId(null)}>
-            <div className="fixed top-4 right-8 z-50">
-                <button
+        <div className=" min-h-screen p-2 sm:p-8" onClick={() => setActiveQuestionId(null)}>
+            <div className="fixed sm:top-4 top-16 sm:right-8 right-4 z-50 flex space-x-2">
+                <Button
+                    onClick={() => router.back()}
+                    className="bg-primary text-white px-6 py-2 rounded-lg shadow-md hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
+                >
+                    <Undo2 size={18} />
+                    Voltar
+                </Button>
+                <Button
                     onClick={handleSave}
                     disabled={isSaving}
                     className="bg-primary text-white px-6 py-2 rounded-lg shadow-md hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
                 >
                     <Save size={18} />
                     {isSaving ? 'Salvando...' : 'Salvar'}
-                </button>
+                </Button>
             </div>
 
-            <div className="fixed right-10 top-1/3 bg-background-foreground p-2 rounded-lg shadow-lg border">
-                <button onClick={(e) => { e.stopPropagation(); addQuestion(); }} className="p-2 hover:bg-gray-100 rounded-full">
+            <div className="fixed sm:right-10 right-3 bottom-10 rounded-lg shadow-lg border z-50">
+                <Button onClick={(e) => { e.stopPropagation(); addQuestion(); }} className=" bg-primary hover:bg-primary-600 [&_svg]:text-white [&_svg]:size-6 w-14 h-14 ">
                     <PlusCircle className="text-gray-600" />
-                </button>
+                </Button>
             </div>
 
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl mx-auto pt-16 sm:pt-0 pb-20">
                 <div className="bg-background-foreground p-6 rounded-lg shadow-md border-t-8 border-primary mb-6">
                     <input
                         type="text"
@@ -197,15 +205,15 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
                         {(provided) => (
                             <div {...provided.droppableProps} ref={provided.innerRef}>
                                 {formState.questions.map((question, index) => (
-                                    <div key={question.id} onClick={(e) => e.stopPropagation()}>
+                                    <div key={question.idQuestion} onClick={(e) => e.stopPropagation()}>
                                         <QuestionCard
                                             question={question}
                                             index={index}
-                                            isActive={activeQuestionId === question.id}
-                                            onClick={() => setActiveQuestionId(question.id)}
+                                            isActive={activeQuestionId === question.idQuestion}
+                                            onClick={() => setActiveQuestionId(question.idQuestion)}
                                             updateQuestion={updateQuestion}
-                                            deleteQuestion={() => deleteQuestion(question.id)}
-                                            duplicateQuestion={() => duplicateQuestion(question.id)}
+                                            deleteQuestion={() => deleteQuestion(question.idQuestion)}
+                                            duplicateQuestion={() => duplicateQuestion(question.idQuestion)}
                                         />
                                     </div>
                                 ))}
