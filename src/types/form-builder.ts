@@ -55,6 +55,7 @@ export interface ResponseAnswerDetail {
     text: string;
     value?: number | null;
     type: QuestionType;
+    options: FormQuestionOption[];
   };
 }
 

@@ -1,15 +1,15 @@
 // components/Breadcrumb.tsx
 "use client";
 
-import { usePathname } from "next/navigation";
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbSeparator,
+  BreadcrumbList,
   BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { usePathname } from "next/navigation";
 
 export function BreadcrumbDynamic() {
   const pathname = usePathname();
@@ -40,11 +40,12 @@ export function BreadcrumbDynamic() {
               <BreadcrumbItem>
                 {isLastSegment ? (
                   <BreadcrumbPage className="text-text">
-                    {capitalize(segment)}
+                    {/* troca - por espaço e deixa as primeiras letras das palavras maiúsculas */}
+                    {capitalize(segment.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '))}
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink href={href} className="text-text">
-                    {capitalize(segment)}
+                    {capitalize(segment.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '))}
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
