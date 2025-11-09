@@ -1,10 +1,41 @@
+"use client";
+
+import { Alert } from "@/components/ui/alert";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect, useMemo } from "react";
+import DashAdmin from "./dash/dash-admin";
+import DashProfessional from "./dash/dash-proficional";
 
 
 export default function Admin() {
-  return (
-    <div className={"grid grid-cols-1 p-2 md:p-4 xl:grid-cols-2 gap-2 md:gap-4 auto-rows-min"}>
-      
-    </div>
 
+  const { getPermissions, loading } = useAuth()
+
+  const perms = useMemo(() => ({
+    admin: getPermissions("dash-admin"),
+    professional: getPermissions("dash-professional"),
+  }), [getPermissions])
+
+  useEffect(() => {
+    console.log("perms: ", perms);
+  }, [perms])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+  if (perms.admin) {
+    return (
+      <DashAdmin />
+    );
+  }
+  if (perms.professional) {
+    return (
+      <DashProfessional />
+    );
+  }
+  return (
+    <Alert variant="destructive">
+      You do not have permission to access this page.
+    </Alert>
   );
 }

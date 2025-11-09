@@ -60,7 +60,7 @@ export function UserFormDialog({
             phone: null,
             nivelAcessoId: "",
             type: EnumUserType.PACIENTE, // Default
-            active: true, // Default
+            active: true, 
         },
     })
 
@@ -174,6 +174,33 @@ export function UserFormDialog({
                                 </FormItem>
                             )}
                         />
+                        {/* password */}
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Senha{isEditing ? " (deixe em branco para manter a atual)" : "*"}</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" placeholder="Senha" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="passwordConfirmation"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Confirmação de Senha{isEditing ? " (deixe em branco para manter a atual)" : "*"}</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" placeholder="Confirme a senha" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
@@ -189,11 +216,16 @@ export function UserFormDialog({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {form.watch("type") !== EnumUserType.PACIENTE ? niveisAcesso.filter(nivel => nivel.idNivelAcesso !== 1).map(nivel => (
+                                                {/* {form.watch("type") === EnumUserType.PACIENTE ? niveisAcesso.filter(nivel => nivel.idNivelAcesso !== 1).map(nivel => (
                                                     <SelectItem key={nivel.idNivelAcesso} value={String(nivel.idNivelAcesso)}>
                                                         {nivel.nome}
                                                     </SelectItem>
                                                 )) : niveisAcesso.filter(nivel => nivel.idNivelAcesso === 1).map(nivel => (
+                                                    <SelectItem key={nivel.idNivelAcesso} value={String(nivel.idNivelAcesso)}>
+                                                        {nivel.nome}
+                                                    </SelectItem>
+                                                ))} */}
+                                                { niveisAcesso.map(nivel => (
                                                     <SelectItem key={nivel.idNivelAcesso} value={String(nivel.idNivelAcesso)}>
                                                         {nivel.nome}
                                                     </SelectItem>

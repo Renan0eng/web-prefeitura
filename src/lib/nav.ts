@@ -1,5 +1,6 @@
 import {
   ClipboardList,
+  Home,
   Shield,
   User,
   UserCheck
@@ -15,6 +16,13 @@ export const data = {
   },
   
   navMain: [
+    {
+      title: "Home",
+      url: "/admin",
+      icon: Home,
+      isActive: false,
+      nivel_acesso: "",
+    },
     {
       title: "Formulários",
       url: "/admin/listar-formulario",

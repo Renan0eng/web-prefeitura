@@ -9,7 +9,8 @@ import {
     ListChecks,
     MoreVertical,
     Plus,
-    Trash2
+    Trash2,
+    UserPlus
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -163,6 +164,15 @@ export default function FormListPage() {
                                         <Link href={`/admin/responder-formulario/${form.idForm}`} className="cursor-pointer">
                                             <List className="mr-2 h-4 w-4" />
                                             <span>Responder Formulário</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={`/admin/atribuir-usuarios/${form.idForm}`}
+                                            className="cursor-pointer"
+                                        >
+                                            <UserPlus className="mr-2 h-4 w-4" />
+                                            <span>Atribuir Usuários</span>
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
