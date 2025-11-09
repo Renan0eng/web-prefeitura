@@ -35,6 +35,7 @@ export interface FormResponseSummary {
   idResponse: string; // ID da Response
   submittedAt: string;
   user: FormSubmitter | null;
+  totalScore: number | null;
 }
 
 // Tipo para o formulário na lista

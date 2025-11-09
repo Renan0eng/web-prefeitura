@@ -128,7 +128,7 @@ export const ResponseDetailPage = ({ responseId }: ResponseDetailPageProps) => {
                 variant="outline"
                 size="icon"
                 onClick={() => router.back()}
-                className="absolute top-6 left-0 sm:left-[-70px] rounded-full text-muted-foreground hover:text-primary"
+                className="absolute top-6 left-0 sm:left-[-70px] rounded-full text-muted-foreground hover:text-white hover:border-primary hover:bg-primary"
             >
                 <ArrowLeft className="h-5 w-5" />
                 <span className="sr-only">Voltar</span>

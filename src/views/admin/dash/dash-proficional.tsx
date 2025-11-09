@@ -1,5 +1,9 @@
+import FormCard from "@/components/tabs/form-card";
+
 export default function DashProfessional() {
     return (
-        <div>Professional Dashboard</div>
+        <div className=" min-h-screen p-2 sm:p-8">
+            <FormCard />
+        </div>
     )
 }
