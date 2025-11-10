@@ -1,0 +1,206 @@
+'use client'
+
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow
+} from '@/components/ui/table'
+import api from '@/services/api'
+import { AlertTriangle, Save } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+
+type User = {
+    idUser: string
+    name: string
+    email: string
+    active: boolean
+}
+
+export default function AssignUser({idForm}: {idForm: string}) {
+    const [users, setUsers] = useState<User[]>([])
+    const [selectedUsers, setSelectedUsers] = useState<string[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [saving, setSaving] = useState(false)
+    const [search, setSearch] = useState('')
+    const [page, setPage] = useState(1)
+    const pageSize = 10
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setIsLoading(true)
+                const [usersRes, assignedRes] = await Promise.all([
+                    api.get('/forms/users/toAssign'),
+                    api.get(`/forms/${idForm}/assigned`)
+                ])
+
+                console.log(assignedRes.data);                
+
+                setUsers(usersRes.data)
+                setSelectedUsers(assignedRes.data.map((u: User) => u.idUser))
+            } catch (err) {
+                console.error(err)
+                setError('Não foi possível carregar os dados.')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchData()
+    }, [idForm])
+
+    const filteredUsers = useMemo(() => {
+        return users.filter(u =>
+            u.name.toLowerCase().includes(search.toLowerCase())
+        )
+    }, [users, search])
+
+    const totalPages = Math.ceil(filteredUsers.length / pageSize)
+    const paginatedUsers = filteredUsers.slice((page - 1) * pageSize, page * pageSize)
+
+    const handleToggle = (userId: string) => {
+        setSelectedUsers(prev =>
+            prev.includes(userId)
+                ? prev.filter(id => id !== userId)
+                : [...prev, userId]
+        )
+    }
+
+    const handleToggleAll = () => {
+        const allIds = paginatedUsers.map(u => u.idUser)
+        const allSelected = allIds.every(id => selectedUsers.includes(id))
+        if (allSelected) {
+            setSelectedUsers(prev => prev.filter(id => !allIds.includes(id)))
+        } else {
+            setSelectedUsers(prev => Array.from(new Set([...prev, ...allIds])))
+        }
+    }
+
+    const handleSave = async () => {
+        try {
+            setSaving(true)
+            await api.post(`/forms/${idForm}/assign`, { userIds: selectedUsers })
+        } catch (err) {
+            console.error(err)
+            setError('Erro ao salvar atribuições.')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    if (isLoading) {
+        return (
+            <div className="p-8 max-w-4xl mx-auto space-y-4">
+                <Skeleton className="h-10 w-1/3" />
+                {[...Array(8)].map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                ))}
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="p-8 max-w-4xl mx-auto">
+                <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Erro</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            </div>
+        )
+    }
+
+    return (
+        <div className="p-8 max-w-5xl mx-auto space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Atribuir Usuários ao Formulário</CardTitle>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                    <Input
+                        placeholder="Buscar por nome..."
+                        value={search}
+                        onChange={e => {
+                            setSearch(e.target.value)
+                            setPage(1)
+                        }}
+                    />
+
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>
+                                    <Checkbox
+                                        checked={
+                                            paginatedUsers.length > 0 &&
+                                            paginatedUsers.every(u => selectedUsers.includes(u.idUser))
+                                        }
+                                        onCheckedChange={handleToggleAll}
+                                    />
+                                </TableHead>
+                                <TableHead>Nome</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Ativo</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedUsers.map(user => (
+                                <TableRow key={user.idUser}>
+                                    <TableCell>
+                                        <Checkbox
+                                            checked={selectedUsers.includes(user.idUser)}
+                                            onCheckedChange={() => handleToggle(user.idUser)}
+                                        />
+                                    </TableCell>
+                                    <TableCell>{user.name}</TableCell>
+                                    <TableCell>{user.email}</TableCell>
+                                    <TableCell>{user.active ? 'Sim' : 'Não'}</TableCell>
+                                </TableRow>
+                            ))}
+                            {paginatedUsers.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                                        Nenhum usuário encontrado.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+
+                    <div className="flex justify-between items-center pt-4">
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                        >
+                            Anterior
+                        </Button>
+                        <span className="text-sm">
+                            Página {page} de {totalPages || 1}
+                        </span>
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            disabled={page === totalPages || totalPages === 0}
+                        >
+                            Próxima
+                        </Button>
+                    </div>
+                </CardContent>
+
+                <CardFooter className="flex justify-end">
+                    <Button onClick={handleSave} disabled={saving}>
+                        <Save className="h-4 w-4 mr-2" />
+                        {saving ? 'Salvando...' : 'Salvar Atribuições'}
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
+    )
+}

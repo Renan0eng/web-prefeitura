@@ -1,13 +1,13 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import api from '@/services/api';
 import { FormResponseDetail, ResponseAnswerDetail } from '@/types/form-builder';
-import { ArrowLeft, Calculator, Calendar, Loader2, User } from 'lucide-react';
+import { Calculator, Calendar, Loader2, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 // 1. NOVAS IMPORTAÇÕES
+import BtnVoltar from '@/components/buttons/btn-voltar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -123,16 +123,8 @@ export const ResponseDetailPage = ({ responseId }: ResponseDetailPageProps) => {
     };
 
     return (
-        <div className="max-w-3xl mx-auto p-8 relative">
-            <Button
-                variant="outline"
-                size="icon"
-                onClick={() => router.back()}
-                className="absolute top-6 left-0 sm:left-[-70px] rounded-full text-muted-foreground hover:text-white hover:border-primary hover:bg-primary"
-            >
-                <ArrowLeft className="h-5 w-5" />
-                <span className="sr-only">Voltar</span>
-            </Button>
+        <div className="max-w-3xl mx-auto p-8 relative xxl:pt-0 pt-8">
+            <BtnVoltar/>
 
             {/* Cabeçalho */}
             <div className="bg-card p-6 rounded-lg shadow-md border-t-8 border-primary mb-6">

@@ -1,18 +1,19 @@
 // views/form-builder/FormBuilderPage.tsx
 'use client';
 
+import BtnVoltar from '@/components/buttons/btn-voltar';
 import { Button } from '@/components/ui/button';
 import api from '@/services/api';
 import { FormQuestion, FormState } from '@/types/form-builder';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
-import { PlusCircle, Save, Undo2 } from 'lucide-react';
+import { PlusCircle, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { QuestionCard } from './QuestionCard';
 
 interface FormBuilderPageProps {
-    formId?: string; 
+    formId?: string;
 }
 
 const EMPTY_STATE: FormState = {
@@ -20,6 +21,7 @@ const EMPTY_STATE: FormState = {
     description: '',
     questions: [],
 };
+
 
 export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
     const router = useRouter();
@@ -159,15 +161,15 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
     }
 
     return (
-        <div className=" min-h-screen p-2 sm:p-8" onClick={() => setActiveQuestionId(null)}>
-            <div className="fixed sm:top-4 top-16 sm:right-8 right-4 z-50 flex space-x-2">
-                <Button
-                    onClick={() => router.back()}
-                    className="bg-primary text-white px-6 py-2 rounded-lg shadow-md hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
-                >
-                    <Undo2 size={18} />
-                    Voltar
+        <div className="min-h-screen px-2 sm:px-8 relative max-w-4xl mx-auto xxl:pt-2 pt-12" onClick={() => setActiveQuestionId(null)}>
+            <BtnVoltar/>
+
+            <div className="fixed sm:right-10 right-3 bottom-10 rounded-lg shadow-lg border z-50">
+                <Button onClick={(e) => { e.stopPropagation(); addQuestion(); }} className=" bg-primary hover:bg-primary-600 [&_svg]:text-white [&_svg]:size-6 w-14 h-14 ">
+                    <PlusCircle className="text-gray-600" />
                 </Button>
+            </div>
+            <div className='w-full flex justify-end pb-2'>
                 <Button
                     onClick={handleSave}
                     disabled={isSaving}
@@ -177,14 +179,7 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
                     {isSaving ? 'Salvando...' : 'Salvar'}
                 </Button>
             </div>
-
-            <div className="fixed sm:right-10 right-3 bottom-10 rounded-lg shadow-lg border z-50">
-                <Button onClick={(e) => { e.stopPropagation(); addQuestion(); }} className=" bg-primary hover:bg-primary-600 [&_svg]:text-white [&_svg]:size-6 w-14 h-14 ">
-                    <PlusCircle className="text-gray-600" />
-                </Button>
-            </div>
-
-            <div className="max-w-3xl mx-auto pt-16 sm:pt-0 pb-20">
+            <div className="mx-auto pt-16 sm:pt-0 pb-20">
                 <div className="bg-background-foreground p-6 rounded-lg shadow-md border-t-8 border-primary mb-6">
                     <input
                         type="text"

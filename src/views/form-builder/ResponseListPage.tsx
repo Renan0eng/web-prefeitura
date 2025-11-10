@@ -1,10 +1,10 @@
 'use client';
 
+import BtnVoltar from '@/components/buttons/btn-voltar';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import api from '@/services/api';
 import { FormResponseSummary, FormWithResponses } from '@/types/form-builder';
-import { ArrowLeft, ChevronRight, User } from 'lucide-react';
+import { ChevronRight, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -44,16 +44,8 @@ export const ResponseListPage = ({ formId }: ResponseListPageProps) => {
     const { title, responses } = data;
 
     return (
-        <div className="max-w-4xl mx-auto p-8 relative">
-            <Button
-                variant="outline"
-                size="icon"
-                onClick={() => router.back()}
-                className="absolute top-6 left-0 sm:left-[-70px] rounded-full text-muted-foreground hover:text-white hover:border-primary hover:bg-primary"
-            >
-                <ArrowLeft className="h-5 w-5" />
-                <span className="sr-only">Voltar</span>
-            </Button>
+        <div className="max-w-4xl mx-auto p-8 relative xxl:pt-0 pt-8">
+            <BtnVoltar/>
             <div>
                 <h1 className="text-3xl font-bold mb-2">Respostas de: {title}</h1>
                 <p className="text-gray-600 mb-6">{responses.length} resposta(s) no total</p>

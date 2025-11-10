@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 // shadcn/ui components
+import BtnVoltar from '@/components/buttons/btn-voltar';
 import {
     Alert,
     AlertDescription,
@@ -56,37 +57,31 @@ export default function FormListPage() {
 
     const basePath = '/admin/criar-formulario';
 
+    const fetchForms = async () => {
+        try {
+            setIsLoading(true);
+            const response = await api.get('/forms');
+            setForms(response.data);
+            setError(null);
+        } catch (err) {
+            console.error("Erro ao buscar formulários:", err);
+            setError("Não foi possível carregar os formulários.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
     useEffect(() => {
-        const fetchForms = async () => {
-            try {
-                setIsLoading(true);
-                const response = await api.get('/forms');
-                setForms(response.data);
-                setError(null);
-            } catch (err) {
-                console.error("Erro ao buscar formulários:", err);
-                setError("Não foi possível carregar os formulários.");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchForms();
     }, []); // Roda apenas uma vez ao montar o componente
 
-    // Placeholder para a função de excluir
-    const handleDelete = (formId: string) => {
-        // Impede que o menu se feche imediatamente (embora o DropdownMenu lide bem com isso)
-        // e.stopPropagation(); 
-
-        if (confirm(`Tem certeza que deseja excluir o formulário ${formId}?`)) {
-            // Lógica real:
-            // try {
-            //   await api.delete(`/forms/${formId}`);
-            //   setForms(forms.filter(f => f.id !== formId));
-            // } catch (err) { ... }
+    const handleDelete = async (id: string) => {
+        try {
+            await api.delete(`/forms/${id}`)
+            fetchForms()
+        } catch (err) {
+            console.error("Erro ao excluir:", err)
         }
-    };
+    }
 
     // Componente de Skeleton para o loading
     const renderSkeletons = () => (
@@ -132,8 +127,8 @@ export default function FormListPage() {
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                             <div className="space-y-1.5">
                                 {/* 1. Corrigido para text-primary semântico */}
-                                <CardTitle className='text-primary'>{form.title}</CardTitle>
-                                <CardDescription className="truncate max-w-lg">
+                                <CardTitle className='text-primary text-wrap'>{form.title}</CardTitle>
+                                <CardDescription className="truncate text-wrap">
                                     {form.description || 'Sem descrição'}
                                 </CardDescription>
                             </div>
@@ -141,7 +136,7 @@ export default function FormListPage() {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     {/* 2. Removido hover:text-white que conflitava com 'ghost' */}
-                                    <Button variant="ghost" size="icon" className='rounded-full'>
+                                    <Button variant="ghost" size="icon" className='rounded-full min-w-10'>
                                         <MoreVertical className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
@@ -213,8 +208,9 @@ export default function FormListPage() {
     };
 
     return (
-        <div className="p-8 max-w-4xl mx-auto">
-            <div className="flex justify-between items-center mb-6">
+        <div className="p-8 max-w-4xl mx-auto relative xxl:pt-9 pt-12">
+            <BtnVoltar className=''/>
+            <div className="flex flex-col justify-between items-center mb-6 md:flex-row sm:gap-4">
                 <h1 className="text-3xl font-bold">Meus Formulários</h1>
 
                 <Link href={basePath}>

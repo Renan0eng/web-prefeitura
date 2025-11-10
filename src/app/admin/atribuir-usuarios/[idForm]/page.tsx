@@ -7,5 +7,7 @@ export default function ViewAssignUserPage({ params }: { params: { idForm: strin
     return <div>ID do formulário não encontrado.</div>;
   }
 
-  return <AssignUserPage idForm={idForm} />;
+  return (
+      <AssignUserPage idForm={idForm} />
+  );
 }
