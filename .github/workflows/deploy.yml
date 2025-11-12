@@ -33,5 +33,5 @@ jobs:
           docker run -d \
             --name web-prefeitura \
             -p 3000:3000 \
-            -e NODE_ENV=production \
+            -e NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
             devnardi/web-prefeitura:latest
