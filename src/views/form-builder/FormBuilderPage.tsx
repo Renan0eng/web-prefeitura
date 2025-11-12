@@ -23,6 +23,7 @@ const EMPTY_STATE: FormState = {
 };
 
 
+
 export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
     const router = useRouter();
     const [isMounted, setIsMounted] = useState(false);
