@@ -1,11 +1,12 @@
 "use client"
 
+import AgendarConsultaDialog from "@/components/appointments/AgendarConsultaDialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import api from "@/services/api"
-import { Eye, MoreVertical } from "lucide-react"
+import { Calendar, Eye, MoreVertical } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
@@ -19,6 +20,8 @@ export default function EsteiraPacientesTab() {
         dataEnvio: true,
         pontuacao: true,
     })
+    const [isAgendarOpen, setIsAgendarOpen] = useState(false)
+    const [selectedResponse, setSelectedResponse] = useState<any | null>(null)
 
     const fetchResponses = async () => {
         try {
@@ -39,8 +42,8 @@ export default function EsteiraPacientesTab() {
 
     return (
         <>
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Esteira de Pacientes</h2>
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <h2 className="text-3xl font-bold tracking-tight">Esteira de Pacientes</h2>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="sm">Colunas</Button>
@@ -107,7 +110,7 @@ export default function EsteiraPacientesTab() {
                                 )}
                                 {visibleColumnsEsteira.pontuacao && (
                                     <TableCell>
-                                        <Badge className="items-center">Score: {response.totalScore ?? 0}</Badge>
+                                        <Badge className="items-center w-fit min-w-20 justify-center flex">Score: {response.totalScore ?? 0}</Badge>
                                     </TableCell>
                                 )}
                                 <TableCell className="text-center p-0 justify-center items-center">
@@ -129,6 +132,12 @@ export default function EsteiraPacientesTab() {
                                                     <span>Visualizar Resposta</span>
                                                 </Link>
                                             </DropdownMenuItem>
+                                                <DropdownMenuItem onSelect={() => { setSelectedResponse(response); setIsAgendarOpen(true); }}>
+                                                    <button className="flex items-center w-full text-left">
+                                                        <Calendar className="mr-2 h-4 w-4" />
+                                                        <span>Agendar Consulta</span>
+                                                    </button>
+                                                </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TableCell>
@@ -137,6 +146,21 @@ export default function EsteiraPacientesTab() {
                     </TableBody>
                 </Table>
             )}
+                {/* Agendamento dialog */}
+                {selectedResponse && (
+                    <AgendarConsultaDialog
+                        isOpen={isAgendarOpen}
+                        onOpenChange={(open) => {
+                            setIsAgendarOpen(open)
+                            if (!open) setSelectedResponse(null)
+                        }}
+                        response={selectedResponse}
+                        onScheduled={() => {
+                            // refresh responses after scheduling if needed
+                            fetchResponses()
+                        }}
+                    />
+                )}
         </>
     )
 }

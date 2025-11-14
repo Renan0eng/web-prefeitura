@@ -56,14 +56,14 @@ export default function FormulariosTab() {
 
     return (
         <>
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Meus Formulários</h2>
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
 
-                <div>
+                <h1 className="text-3xl font-bold tracking-tight">Meus Formulários</h1>
+                <div className="flex flex-wrap gap-4 items-center">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
-                                <Settings2 className="h-4 w-4 mr-2" />
+                                <Settings2 className="h-4 w-4" />
                                 Colunas
                             </Button>
                         </DropdownMenuTrigger>
@@ -81,7 +81,7 @@ export default function FormulariosTab() {
                             ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <Link href={"/admin/criar-formulario"} className="ml-4">
+                    <Link href={"/admin/criar-formulario"} >
                         <Button className="text-white">
                             <Plus size={18} className="mr-2" />
                             Criar Novo Formulário
@@ -94,14 +94,15 @@ export default function FormulariosTab() {
             {isLoading ? (
                 <p>Carregando...</p>
             ) : (
-                <Table className="overflow-hidden rounded-lg border">
+                <div className="rounded-lg border overflow-hidden">
+                <Table className="scrollable overflow-auto">
                     <TableHeader className="sticky top-0 z-10 bg-muted">
                         <TableRow>
-                            {columns.title && <TableHead>Título</TableHead>}
+                            {columns.title && <TableHead className="min-w-52">Título</TableHead>}
                             {columns.description && <TableHead>Descrição</TableHead>}
-                            {columns.updatedAt && <TableHead>Atualizado em</TableHead>}
+                            {columns.updatedAt && <TableHead className="min-w-32">Atualizado em</TableHead>}
                             {columns.responses && <TableHead>Respostas</TableHead>}
-                            {columns.actions && <TableHead className="max-w-8">Ações</TableHead>}
+                            {columns.actions && <TableHead className="min-w-20 flex justify-center items-center">Ações</TableHead>}
                         </TableRow>
                     </TableHeader>
                     <TableBody className="bg-white/40">
@@ -109,7 +110,7 @@ export default function FormulariosTab() {
                             <TableRow key={form.idForm}>
                                 {columns.title && <TableCell>{form.title}</TableCell>}
                                 {columns.description && (
-                                    <TableCell className="max-w-[300px] truncate">{form.description}</TableCell>
+                                    <TableCell className="max-w-[200px] truncate">{form.description}</TableCell>
                                 )}
                                 {columns.updatedAt && (
                                     <TableCell>
@@ -123,10 +124,10 @@ export default function FormulariosTab() {
                                     </TableCell>
                                 )}
                                 {columns.responses && (
-                                    <TableCell>
+                                    <TableCell className="max-w-[120px]">
                                         <Link href={`/admin/criar-formulario/${form.idForm}/respostas`}>
-                                            <Badge className="items-center">
-                                                <ListChecks className="mr-1.5 h-3.5 w-3.5" />
+                                            <Badge className="inline-flex items-center gap-2 px-2 py-1 whitespace-nowrap">
+                                                <ListChecks className="h-3.5 w-3.5" />
                                                 <span>
                                                     {form.responses} {form.responses === 1 ? "Resposta" : "Respostas"}
                                                 </span>
@@ -163,6 +164,12 @@ export default function FormulariosTab() {
                                                         Atribuir Usuários
                                                     </Link>
                                                 </DropdownMenuItem>
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={`/admin/criar-formulario/${form.idForm}/respostas`} className="cursor-pointer">
+                                                        <ListChecks className="mr-2 h-4 w-4" />
+                                                        <span>Ver Respostas</span>
+                                                    </Link>
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem
                                                     className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer"
@@ -179,6 +186,7 @@ export default function FormulariosTab() {
                         ))}
                     </TableBody>
                 </Table>
+                </div>
             )}
 
             <div className="flex justify-end items-center mt-4 space-x-2">

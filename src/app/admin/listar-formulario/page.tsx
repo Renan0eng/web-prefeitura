@@ -1,5 +1,9 @@
-import FormListPage from "@/views/form-builder/FormListPage";
+import FormulariosTab from "@/views/form-builder/tabs/FormulariosTab";
 
 export default function Page() {
-    return (<FormListPage />);
+    return (
+        <div className="p-2 md:p-4 lg:p-8">
+            <FormulariosTab />
+        </div>
+);
 }

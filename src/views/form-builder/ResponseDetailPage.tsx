@@ -123,7 +123,7 @@ export const ResponseDetailPage = ({ responseId }: ResponseDetailPageProps) => {
     };
 
     return (
-        <div className="max-w-3xl mx-auto p-8 relative xxl:pt-0 pt-8">
+        <div className="max-w-3xl mx-auto px-2 sm:px-6 relative xxl:pt-0 pt-14">
             <BtnVoltar/>
 
             {/* Cabeçalho */}

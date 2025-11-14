@@ -12,11 +12,11 @@
 
 /* Ao passar o mouse sobre a lista */
 .scrollable:hover::-webkit-scrollbar-thumb {
-  background-color: #ffffff25; /* Polegar visível */
+  background-color: #00000010; /* Polegar visível */
 }
 
 .scrollable::-webkit-scrollbar-thumb:hover {
-  background-color: #ffffff70; /* Cor do "polegar" ao passar o mouse */
+  background-color: #00000025; /* Cor do "polegar" ao passar o mouse */
 }
 
 .scrollable::-webkit-scrollbar-track {

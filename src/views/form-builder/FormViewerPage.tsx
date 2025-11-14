@@ -3,6 +3,7 @@
 import api from '@/services/api';
 import { FormQuestion, FormState } from '@/types/form-builder';
 import { Send } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { QuestionRenderer } from './QuestionRenderer';
 
@@ -20,6 +21,8 @@ export const FormViewerPage = ({ formId }: FormViewerPageProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
+
+    const router = useRouter();
 
     // 1. Efeito para buscar os dados do formulário
     useEffect(() => {
@@ -88,6 +91,7 @@ export const FormViewerPage = ({ formId }: FormViewerPageProps) => {
             };
 
             await api.post(`/forms/${formId}/responses`, payload);
+            router.back();
             setSubmitSuccess(true);
         } catch (error) {
             console.error("Erro ao enviar resposta:", error);

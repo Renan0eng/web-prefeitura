@@ -5,9 +5,7 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
+  BreadcrumbList
 } from "@/components/ui/breadcrumb";
 import { usePathname } from "next/navigation";
 
@@ -27,20 +25,17 @@ export function BreadcrumbDynamic() {
         </BreadcrumbItem>
 
         {/* Gera os itens do breadcrumb com base nos segmentos do caminho */}
-        {pathSegments.map((segment, index) => {
+        {/* {pathSegments.map((segment, index) => {
           const href = `/admin/${pathSegments.slice(0, index + 1).join("/")}`;
           const isLastSegment = index === pathSegments.length - 1;
 
           return (
             <div key={index} className="flex gap-[2px] md:gap-2 justify-center items-center">
-              {/* Separador */}
               <BreadcrumbSeparator className=" text-text" />
 
-              {/* Item do breadcrumb */}
               <BreadcrumbItem>
                 {isLastSegment ? (
                   <BreadcrumbPage className="text-text">
-                    {/* troca - por espaço e deixa as primeiras letras das palavras maiúsculas */}
                     {capitalize(segment.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '))}
                   </BreadcrumbPage>
                 ) : (
@@ -51,7 +46,7 @@ export function BreadcrumbDynamic() {
               </BreadcrumbItem>
             </div>
           );
-        })}
+        })} */}
       </BreadcrumbList>
     </Breadcrumb>
   );

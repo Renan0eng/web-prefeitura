@@ -44,12 +44,15 @@ export const ResponseListPage = ({ formId }: ResponseListPageProps) => {
     const { title, responses } = data;
 
     return (
-        <div className="max-w-4xl mx-auto p-8 relative xxl:pt-0 pt-8">
+        <div className="max-w-4xl mx-auto px-2 sm:px-8 relative xxl:pt-0 pt-12">
             <BtnVoltar/>
             <div>
-                <h1 className="text-3xl font-bold mb-2">Respostas de: {title}</h1>
-                <p className="text-gray-600 mb-6">{responses.length} resposta(s) no total</p>
+                <div className="flex flex-wrap items-center">
+                <h1 className="text-3xl font-bold pr-2">Respostas de:</h1>
+                <h1 className="text-2xl">{title}</h1>
+                </div>
 
+                <p className="text-gray-600 mb-6">{responses.length} resposta(s) no total</p>
                 <div className="bg-background-foreground rounded-lg shadow-md border">
                     {responses.length === 0 ? (
                         <p className="p-6 text-center text-gray-500">Nenhuma resposta recebida ainda.</p>
@@ -75,7 +78,7 @@ export const ResponseListPage = ({ formId }: ResponseListPageProps) => {
                                         </div>
                                     </div>
                                     <div className='flex items-center gap-2 text-gray-700'>
-                                        <Badge className=" hover:text-white">
+                                        <Badge className=" hover:text-white w-fit min-w-20 items-center justify-center flex">
                                             Score: {response.totalScore}
                                         </Badge>
                                         <ChevronRight size={18} className="text-gray-400" />
