@@ -1,12 +1,12 @@
 "use client";
 import { useAlert } from "@/hooks/use-alert";
+import { cva } from "class-variance-authority";
 import { Terminal } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { cva, type VariantProps } from "class-variance-authority";
 import { useEffect } from "react";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 // Definindo as variantes de alerta
-const alertVariants = cva("absolute top-4 right-4 z-50 w-80 p-4 bg-yellow-200 border border-yellow-500 rounded-lg shadow-lg", {
+const alertVariants = cva("absolute top-4 right-4 z-50 w-fit max-w-full p-4 bg-yellow-200 border border-yellow-500 rounded-lg shadow-lg", {
   variants: {
     type: {
       success: "bg-green-200 border border-green-500 text-green-800",

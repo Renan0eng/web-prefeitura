@@ -4,6 +4,7 @@
 import BtnVoltar from '@/components/buttons/btn-voltar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAlert } from '@/hooks/use-alert';
 import { useAuth } from '@/hooks/use-auth';
 import api from '@/services/api';
 import { FormQuestion, FormState } from '@/types/form-builder';
@@ -19,7 +20,7 @@ interface FormBuilderPageProps {
 }
 
 const EMPTY_STATE: FormState = {
-    title: 'Formulário sem título',
+    title: '',
     description: '',
     questions: [],
 };
@@ -34,6 +35,8 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
     const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+
+    const alert = useAlert();
 
     const permissions = !authLoading && getPermissions
         ? getPermissions('formulario')
@@ -162,8 +165,9 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
                 const newData = response.data;
                 router.push(`/admin/criar-formulario/${newData.idForm}`);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Erro ao salvar:', error);
+            alert.setAlert(error?.response?.data?.message || 'Erro ao salvar o formulário.', 'error');
         } finally {
             setIsSaving(false);
         }
@@ -265,6 +269,7 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
                 <div className="bg-background-foreground p-6 rounded-lg shadow-md border-t-8 border-primary mb-6">
                     <input
                         type="text"
+                        placeholder="Título do formulário"
                         value={formState.title}
                         onChange={(e) => setFormState({ ...formState, title: e.target.value })}
                         className="w-full text-3xl border-b-2 border-gray-200 focus:border-primary outline-none pb-2 bg-transparent"
