@@ -5,12 +5,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAlert } from "@/hooks/use-alert"
 import { useAuth } from "@/hooks/use-auth"; // Importa o useAuth
 import api from "@/services/api"
 import { MenuAcesso, NivelAcesso } from "@/types/access-level"
-import { Loader2, MoreHorizontal, PlusCircle } from "lucide-react"
+import { MoreHorizontal, PlusCircle } from "lucide-react"
 import * as React from "react"
 import { GerenciarMenusNivelDialog } from "../../../components/access-level/gerenciar-menus-nivel-dialog"
 
@@ -90,7 +91,31 @@ export function GerenciarNiveisAcesso() {
 
   // Bloqueia a tela inteira se não tiver permissão de visualizar
   if (isLoading) {
-    return <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+    return (
+      <div className="min-h-[280px]">
+        <Card>
+          <CardHeader>
+            <div>
+              <Skeleton className="h-6 w-1/3" />
+              <Skeleton className="h-4 w-2/3 mt-2" />
+            </div>
+            <div>
+              <Skeleton className="h-9 w-28" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-full" />
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="py-2">
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   if (!permissions?.visualizar) {

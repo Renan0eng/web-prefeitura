@@ -5,12 +5,13 @@ import { UsuarioNivelDialog } from "@/components/access-level/usuario-nivel-dial
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAlert } from "@/hooks/use-alert"
 import { useAuth } from "@/hooks/use-auth"; // Importa
 import api from "@/services/api"
 import { NivelAcesso, UserComNivel } from "@/types/access-level"
-import { Edit, Loader2 } from "lucide-react"
+import { Edit } from "lucide-react"
 import * as React from "react"
 
 export function GerenciarAtribuicaoUsuarios() {
@@ -61,7 +62,28 @@ export function GerenciarAtribuicaoUsuarios() {
 
     // Bloqueia a tela inteira se não tiver permissão de visualizar
     if (isLoading) {
-        return <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+        return (
+            <div className="min-h-[240px]">
+                <Card>
+                    <CardHeader>
+                        <div>
+                            <Skeleton className="h-6 w-1/3" />
+                            <Skeleton className="h-4 w-2/3 mt-2" />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-2">
+                            <Skeleton className="h-6 w-full" />
+                            {Array.from({ length: 4 }).map((_, i) => (
+                                <div key={i} className="py-2">
+                                    <Skeleton className="h-8 w-full" />
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        )
     }
 
     if (!permissions?.visualizar) {

@@ -5,12 +5,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAlert } from "@/hooks/use-alert"
 import { useAuth } from "@/hooks/use-auth"; // Importa
 import api from "@/services/api"
 import { MenuAcesso } from "@/types/access-level"
-import { Loader2, MoreHorizontal, PlusCircle } from "lucide-react"
+import { MoreHorizontal, PlusCircle } from "lucide-react"
 import * as React from "react"
 
 export function GerenciarMenusSistema() {
@@ -67,7 +68,26 @@ export function GerenciarMenusSistema() {
 
     // Bloqueia a tela inteira se não tiver permissão de visualizar
     if (isLoading) {
-        return <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+        return (
+            <div className="min-h-[240px]">
+                <Card>
+                    <CardHeader className="flex items-center justify-between">
+                        <div>
+                            <Skeleton className="h-6 w-48" />
+                            <Skeleton className="h-4 w-40 mt-2" />
+                        </div>
+                        <Skeleton className="h-9 w-28" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-2">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <Skeleton key={i} className="h-12 w-full" />
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        )
     }
 
     if (!permissions?.visualizar) {

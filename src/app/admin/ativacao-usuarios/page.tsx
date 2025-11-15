@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAlert } from "@/hooks/use-alert"
@@ -65,8 +66,47 @@ export default function AtivacaoUsuariosPage() {
     
     if (isLoading) {
         return (
-            <div className="container mx-auto p-4 md:p-8 flex justify-center items-center h-[300px]">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <div className="container mx-auto p-4 md:p-8">
+                <div className="mb-6">
+                    <Skeleton className="h-8 w-1/3" />
+                </div>
+                <Card>
+                    <CardHeader>
+                        <div>
+                            <Skeleton className="h-5 w-48" />
+                            <Skeleton className="h-4 w-2/3 mt-2" />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Usuário</TableHead>
+                                    <TableHead>Nível de Acesso</TableHead>
+                                    <TableHead className="w-[120px] text-right">Status (Ativo)</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {Array.from({ length: 6 }).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell>
+                                            <Skeleton className="h-4 w-40" />
+                                            <Skeleton className="h-3 w-56 mt-2" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton className="h-4 w-28" />
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end items-center space-x-2">
+                                                <Skeleton className="h-6 w-12" />
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
             </div>
         )
     }

@@ -1,6 +1,7 @@
 "use client"
 
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
 import { GerenciarAtribuicaoUsuarios } from "@/views/admin/access-level/gerenciar-atribuicao-usuarios";
@@ -24,6 +25,37 @@ export default function PaginaAcessos() {
         if (perms.usuarios?.visualizar) return "usuarios"
         return "" 
     }, [perms])
+
+    // Mostrar Skeleton enquanto as permissões estão sendo carregadas
+    if (loading) {
+        return (
+            <div className=" mx-auto p-2 md:p-4">
+                <Skeleton className="h-8 w-1/3 mb-6" />
+
+                <div className="mb-4 flex gap-3">
+                    <Skeleton className="h-9 w-40" />
+                    <Skeleton className="h-9 w-40" />
+                    <Skeleton className="h-9 w-40" />
+                </div>
+
+                <Card>
+                    <CardHeader>
+                        <div>
+                            <Skeleton className="h-5 w-40" />
+                            <Skeleton className="h-4 w-2/3 mt-2" />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3">
+                            {Array.from({ length: 4 }).map((_, i) => (
+                                <Skeleton key={i} className="h-12 w-full" />
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
 
     if (!loading && !defaultTab) {
         return (
