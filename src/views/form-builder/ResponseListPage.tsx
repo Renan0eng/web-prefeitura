@@ -2,11 +2,12 @@
 
 import BtnVoltar from '@/components/buttons/btn-voltar';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/use-auth';
 import api from '@/services/api';
 import { FormResponseSummary, FormWithResponses } from '@/types/form-builder';
 import { ChevronRight, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface ResponseListPageProps {
     formId: string;
@@ -14,6 +15,8 @@ interface ResponseListPageProps {
 
 export const ResponseListPage = ({ formId }: ResponseListPageProps) => {
     const router = useRouter();
+    const { getPermissions, loading: authLoading } = useAuth();
+    const permissions = useMemo(() => getPermissions('respostas'), [getPermissions]);
     const [data, setData] = useState<FormWithResponses | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -30,8 +33,18 @@ export const ResponseListPage = ({ formId }: ResponseListPageProps) => {
             }
         };
 
-        fetchResponses();
-    }, [formId]);
+        if (permissions?.visualizar) {
+            fetchResponses();
+        }
+    }, [formId, permissions?.visualizar]);
+
+    if (authLoading) {
+        return <div className="p-8">Carregando...</div>;
+    }
+
+    if (!permissions?.visualizar) {
+        return <div className="p-8">Você não tem permissão para visualizar respostas.</div>;
+    }
 
     if (isLoading) {
         return <div className="p-8">Carregando respostas...</div>;

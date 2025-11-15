@@ -6,10 +6,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useAuth } from '@/hooks/use-auth'
 import api from "@/services/api"
 import { Edit, List, ListChecks, MoreVertical, Plus, Settings2, Trash2, UserPlus } from "lucide-react"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 export default function FormulariosTab() {
     const [page, setPage] = useState(1)
@@ -41,7 +42,6 @@ export default function FormulariosTab() {
             setIsLoading(false)
         }
     }
-
     const handleDelete = async (id: string) => {
         try {
             await api.delete(`/forms/${id}`)
@@ -51,9 +51,12 @@ export default function FormulariosTab() {
         }
     }
 
+    const { getPermissions, loading: authLoading } = useAuth()
+    const permissions = useMemo(() => getPermissions('formulario'), [getPermissions])
+
     useEffect(() => {
-        fetchForms()
-    }, [page])
+        if (permissions?.visualizar) fetchForms()
+    }, [page, permissions?.visualizar])
 
     return (
         <>
@@ -82,12 +85,14 @@ export default function FormulariosTab() {
                             ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <Link href={"/admin/criar-formulario"} >
-                        <Button className="text-white">
-                            <Plus size={18} className="mr-2" />
-                            Criar Novo Formulário
-                        </Button>
-                    </Link>
+                    {permissions?.criar && (
+                        <Link href={'/admin/criar-formulario'} >
+                            <Button className="text-white">
+                                <Plus size={18} className="mr-2" />
+                                Criar Novo Formulário
+                            </Button>
+                        </Link>
+                    )}
                 </div>
             </div>
 
@@ -156,12 +161,14 @@ export default function FormulariosTab() {
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Ações</DropdownMenuLabel>
                                                     <DropdownMenuSeparator />
-                                                    <DropdownMenuItem asChild>
-                                                        <Link href={`/admin/criar-formulario/${form.idForm}`}>
-                                                            <Edit className="mr-2 h-4 w-4" />
-                                                            Editar Formulário
-                                                        </Link>
-                                                    </DropdownMenuItem>
+                                                    {permissions?.editar && (
+                                                        <DropdownMenuItem asChild>
+                                                            <Link href={`/admin/criar-formulario/${form.idForm}`}>
+                                                                <Edit className="mr-2 h-4 w-4" />
+                                                                Editar Formulário
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                    )}
                                                     <DropdownMenuItem asChild>
                                                         <Link href={`/admin/responder-formulario/${form.idForm}`}>
                                                             <List className="mr-2 h-4 w-4" />
@@ -181,14 +188,16 @@ export default function FormulariosTab() {
                                                         </Link>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
-                                                    <DropdownMenuItem
-                                                        className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer"
-                                                        onSelect={() => handleDelete(form.idForm)}
-                                                    >
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        Excluir
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
+                                                    {permissions?.excluir && (
+                                                        <DropdownMenuItem
+                                                            className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer"
+                                                            onSelect={() => handleDelete(form.idForm)}
+                                                        >
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            Excluir
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    </DropdownMenuContent>
                                             </DropdownMenu>
                                         </TableCell>
                                     )}

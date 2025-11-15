@@ -1,10 +1,11 @@
 'use client';
 
+import { useAuth } from '@/hooks/use-auth';
 import api from '@/services/api';
 import { FormQuestion, FormState } from '@/types/form-builder';
 import { Send } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { QuestionRenderer } from './QuestionRenderer';
 
 // Um tipo para armazenar as respostas. A chave é o question.id
@@ -15,6 +16,16 @@ interface FormViewerPageProps {
 }
 
 export const FormViewerPage = ({ formId }: FormViewerPageProps) => {
+    const { getPermissions, loading: authLoading } = useAuth();
+    const permissions = useMemo(() => getPermissions('formulario'), [getPermissions]);
+
+    if (authLoading) {
+        return <div className="flex justify-center items-center min-h-screen">Carregando...</div>;
+    }
+
+    if (!permissions?.visualizar) {
+        return <div className="flex justify-center items-center min-h-screen">Você não tem permissão para responder/visualizar este formulário.</div>;
+    }
     const [formState, setFormState] = useState<FormState | null>(null);
     const [answers, setAnswers] = useState<AnswersState>({});
     const [isLoading, setIsLoading] = useState(true);

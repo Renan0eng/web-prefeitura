@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth } from '@/hooks/use-auth';
 import api from '@/services/api';
 import {
     AlertTriangle,
@@ -13,7 +14,7 @@ import {
     UserPlus
 } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 // shadcn/ui components
 import BtnVoltar from '@/components/buttons/btn-voltar';
@@ -55,6 +56,9 @@ export default function FormListPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const { getPermissions, loading: authLoading } = useAuth();
+    const permissions = useMemo(() => getPermissions('formulario'), [getPermissions]);
+
     const basePath = '/admin/criar-formulario';
 
     const fetchForms = async () => {
@@ -71,8 +75,8 @@ export default function FormListPage() {
         }
     };
     useEffect(() => {
-        fetchForms();
-    }, []); // Roda apenas uma vez ao montar o componente
+        if (permissions?.visualizar) fetchForms();
+    }, [permissions?.visualizar]); // Roda quando permissões estiverem disponíveis
 
     const handleDelete = async (id: string) => {
         try {

@@ -3,6 +3,8 @@
 
 import BtnVoltar from '@/components/buttons/btn-voltar';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/hooks/use-auth';
 import api from '@/services/api';
 import { FormQuestion, FormState } from '@/types/form-builder';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
@@ -25,43 +27,128 @@ const EMPTY_STATE: FormState = {
 
 
 export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
+    const { getPermissions, loading: authLoading } = useAuth();
+
     const router = useRouter();
-    const [isMounted, setIsMounted] = useState(false);
     const [formState, setFormState] = useState<FormState>(EMPTY_STATE);
     const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
-    // Efeito para buscar dados
+    const permissions = !authLoading && getPermissions
+        ? getPermissions('formulario')
+        : null;
+
+    // Efeito para carregar dados do formulário quando houver formId
     useEffect(() => {
-        // Se NÃO houver formId, apenas carregamos o estado vazio.
-        if (!formId) {
-            setIsLoading(false);
-            setIsMounted(true);
-            return; // <--- Importante: para a execução
+        if (authLoading) {
+            return;
         }
 
-        // Se HOUVER formId, buscamos os dados
+        if (!formId) {
+            // Tela de criação: estado inicial vazio
+            setFormState(EMPTY_STATE);
+            setActiveQuestionId(null);
+            setIsLoading(false);
+            return;
+        }
+
+        if (!permissions?.visualizar) {
+            setIsLoading(false);
+            return;
+        }
+
+        let isCancelled = false;
+
         const fetchForm = async () => {
             try {
                 setIsLoading(true);
                 const response = await api.get(`/forms/${formId}`);
+                if (isCancelled) return;
+
                 const data = response.data;
                 setFormState(data);
                 if (data.questions.length > 0) {
                     setActiveQuestionId(data.questions[0].id);
+                } else {
+                    setActiveQuestionId(null);
                 }
             } catch (error) {
-                console.error("Falha ao carregar formulário:", error);
-                setFormState(EMPTY_STATE);
+                if (!isCancelled) {
+                    console.error("Falha ao carregar formulário:", error);
+                    setFormState(EMPTY_STATE);
+                }
             } finally {
-                setIsLoading(false);
-                setIsMounted(true);
+                if (!isCancelled) {
+                    setIsLoading(false);
+                }
             }
         };
 
         fetchForm();
-    }, [formId]);
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [authLoading, formId, permissions?.visualizar]);
+
+    // Se o auth ainda estiver carregando ou o form não foi inicializado, mostramos skeletons mais ricos
+    if (authLoading || isLoading) {
+        return (
+            <div className="min-h-screen px-4 sm:px-8 py-12">
+                <div className="max-w-4xl mx-auto space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div className="w-3/4">
+                            <Skeleton className="h-10 w-3/4" />
+                            <Skeleton className="h-4 w-2/3 mt-2" />
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Skeleton className="h-10 w-28" />
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                        </div>
+                    </div>
+
+                    <div className="bg-background-foreground p-6 rounded-lg shadow-md border-t-8 border-primary">
+                        <Skeleton className="h-8 w-full mb-4" />
+                        <Skeleton className="h-24 w-full" />
+                    </div>
+
+                    <div className="space-y-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="bg-background-foreground p-4 rounded-lg shadow-sm">
+                                <Skeleton className="h-6 w-1/2 mb-3" />
+                                <Skeleton className="h-12 w-full" />
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex justify-end items-center gap-4">
+                        <Skeleton className="h-10 w-28" />
+                        <Skeleton className="h-14 w-14 rounded-full" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Controle básico de acesso: se estamos editando (formId) requer visualizar, se criando requer criar
+    if (formId && !permissions?.visualizar) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div>Você não tem permissão para editar este formulário.</div>
+            </div>
+        );
+    }
+
+    if (!formId && !permissions?.criar) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div>Você não tem permissão para criar formulários.</div>
+            </div>
+        );
+    }
+
+    // Nenhum outro efeito adicional necessário; dados são carregados no efeito acima
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -153,13 +240,7 @@ export const FormBuilderPage = ({ formId }: FormBuilderPageProps) => {
         setActiveQuestionId(newQuestion.idQuestion);
     };
 
-    if (!isMounted || isLoading) {
-        return (
-            <div className="flex justify-center items-center min-h-screen">
-                Carregando construtor...
-            </div>
-        );
-    }
+
 
     return (
         <div className="min-h-screen px-2 sm:px-8 relative max-w-4xl mx-auto xxl:pt-2 pt-12" onClick={() => setActiveQuestionId(null)}>

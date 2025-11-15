@@ -1,9 +1,9 @@
 'use client';
 
+import { useAuth } from '@/hooks/use-auth';
 import api from '@/services/api';
 import { FormResponseDetail, ResponseAnswerDetail } from '@/types/form-builder';
-import { Calculator, Calendar, Loader2, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Calculator, Calendar, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 // 1. NOVAS IMPORTAÇÕES
@@ -11,6 +11,7 @@ import BtnVoltar from '@/components/buttons/btn-voltar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ResponseDetailPageProps {
     responseId: string;
@@ -19,32 +20,103 @@ interface ResponseDetailPageProps {
 type ApiResponse = FormResponseDetail & { totalScore: number };
 
 export const ResponseDetailPage = ({ responseId }: ResponseDetailPageProps) => {
+    const { getPermissions, loading: authLoading } = useAuth();
+    const permissions = !authLoading && getPermissions ? getPermissions('respostas') : null;
+
     const [response, setResponse] = useState<ApiResponse | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const router = useRouter();
 
     useEffect(() => {
+        if (authLoading) {
+            return;
+        }
+
+        if (!permissions?.visualizar) {
+            setIsLoading(false);
+            setResponse(null);
+            return;
+        }
+
+        let isCancelled = false;
+
         const fetchResponseDetail = async () => {
             try {
                 setIsLoading(true);
                 const res = await api.get<ApiResponse>(`/forms/response/${responseId}`);
-                setResponse(res.data);
+                if (!isCancelled) {
+                    setResponse(res.data);
+                }
             } catch (error) {
-                console.error("Falha ao carregar detalhes da resposta:", error);
+                if (!isCancelled) {
+                    console.error("Falha ao carregar detalhes da resposta:", error);
+                    setResponse(null);
+                }
             } finally {
-                setIsLoading(false);
+                if (!isCancelled) {
+                    setIsLoading(false);
+                }
             }
         };
 
         fetchResponseDetail();
-    }, [responseId]);
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [authLoading, permissions?.visualizar, responseId]);
+
+    if (authLoading) {
+        return (
+            <div className="p-8">
+                <div className="max-w-3xl mx-auto space-y-6">
+                    <div className="bg-card p-4 rounded-md ">
+                        <Skeleton className="h-8 w-full mb-2" />
+                        <Skeleton className="h-4 w-full mb-2" />
+                        <Skeleton className="h-4 w-1/2 mb-2" />
+                        <Skeleton className="h-4 w-1/2 mb-2" />
+                        <Skeleton className="h-4 w-1/2 mb-2" />
+                    </div>
+
+                    <div className="space-y-4">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="bg-card p-4 rounded-md">
+                                <Skeleton className="h-6 w-2/3 mb-3" />
+                                <Skeleton className="h-36 w-full" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!permissions?.visualizar) {
+        return (
+            <div className="p-8">Você não tem permissão para visualizar detalhes de respostas.</div>
+        );
+    }
 
 
     if (isLoading) {
         return (
-            <div className="p-8 flex justify-center items-center min-h-[300px]">
-                <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                Carregando detalhes da resposta...
+            <div className="p-8">
+                <div className="max-w-3xl mx-auto space-y-6">
+                    <div className="bg-card p-4 rounded-md ">
+                        <Skeleton className="h-8 w-full mb-2" />
+                        <Skeleton className="h-4 w-full mb-2" />
+                        <Skeleton className="h-4 w-1/2 mb-2" />
+                        <Skeleton className="h-4 w-1/2 mb-2" />
+                        <Skeleton className="h-4 w-1/2 mb-2" />
+                    </div>
+                    <div className="space-y-4">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="bg-card p-4 rounded-md">
+                                <Skeleton className="h-6 w-2/3 mb-3" />
+                                <Skeleton className="h-36 w-full" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }
@@ -58,7 +130,7 @@ export const ResponseDetailPage = ({ responseId }: ResponseDetailPageProps) => {
         const { question, value, values } = answer;
 
         switch (question.type) {
-            
+
             // --- Caso 1: Múltipla Escolha ---
             case 'MULTIPLE_CHOICE':
                 if (!value) {
@@ -116,7 +188,7 @@ export const ResponseDetailPage = ({ responseId }: ResponseDetailPageProps) => {
                         {value}
                     </blockquote>
                 );
-            
+
             default:
                 return <p className="italic text-muted-foreground">Tipo de pergunta não suportado.</p>;
         }
@@ -124,7 +196,7 @@ export const ResponseDetailPage = ({ responseId }: ResponseDetailPageProps) => {
 
     return (
         <div className="max-w-3xl mx-auto px-2 sm:px-6 relative xxl:pt-0 pt-14">
-            <BtnVoltar/>
+            <BtnVoltar />
 
             {/* Cabeçalho */}
             <div className="bg-card p-6 rounded-lg shadow-md border-t-8 border-primary mb-6">

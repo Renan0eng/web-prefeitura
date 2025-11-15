@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/table'
 import api from '@/services/api'
 import { AlertTriangle, Save } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 type User = {
@@ -29,6 +30,8 @@ export default function AssignUser({idForm}: {idForm: string}) {
     const [search, setSearch] = useState('')
     const [page, setPage] = useState(1)
     const pageSize = 10
+
+    const router = useRouter()
 
     useEffect(() => {
         const fetchData = async () => {
@@ -84,6 +87,7 @@ export default function AssignUser({idForm}: {idForm: string}) {
         try {
             setSaving(true)
             await api.post(`/forms/${idForm}/assign`, { userIds: selectedUsers })
+            router.back()
         } catch (err) {
             console.error(err)
             setError('Erro ao salvar atribuições.')
@@ -94,11 +98,16 @@ export default function AssignUser({idForm}: {idForm: string}) {
 
     if (isLoading) {
         return (
-            <div className="p-8 max-w-4xl mx-auto space-y-4">
-                <Skeleton className="h-10 w-1/3" />
-                {[...Array(8)].map((_, i) => (
-                    <Skeleton key={i} className="h-12 w-full" />
-                ))}
+            <div className="max-w-4xl mx-auto p-8">
+                <div className="space-y-4">
+                    <Skeleton className="h-8 w-1/3" />
+                    <Skeleton className="h-4 w-2/3" />
+
+                    <div className="bg-background-foreground p-4 rounded-lg mt-4">
+                        <Skeleton className="h-6 w-full mb-2" />
+                        <Skeleton className="h-40 w-full" />
+                    </div>
+                </div>
             </div>
         )
     }
