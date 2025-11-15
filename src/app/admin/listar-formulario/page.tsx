@@ -1,3 +1,5 @@
+"use client"
+
 import FormulariosTab from "@/views/form-builder/tabs/FormulariosTab";
 
 export default function Page() {

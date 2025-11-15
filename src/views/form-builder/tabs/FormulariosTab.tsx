@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import api from "@/services/api"
@@ -11,10 +12,10 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 
 export default function FormulariosTab() {
-    const [forms, setForms] = useState<any[]>([])
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
     const [page, setPage] = useState(1)
+    const [forms, setForms] = useState<any[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
     const [limit] = useState(10)
     const [totalPages, setTotalPages] = useState(1)
 
@@ -91,10 +92,7 @@ export default function FormulariosTab() {
             </div>
 
             {error && <p className="text-red-500">{error}</p>}
-            {isLoading ? (
-                <p>Carregando...</p>
-            ) : (
-                <div className="rounded-lg border overflow-hidden">
+            <div className="rounded-lg border overflow-hidden">
                 <Table className="scrollable overflow-auto">
                     <TableHeader className="sticky top-0 z-10 bg-muted">
                         <TableRow>
@@ -106,88 +104,100 @@ export default function FormulariosTab() {
                         </TableRow>
                     </TableHeader>
                     <TableBody className="bg-white/40">
-                        {forms.map((form) => (
-                            <TableRow key={form.idForm}>
-                                {columns.title && <TableCell>{form.title}</TableCell>}
-                                {columns.description && (
-                                    <TableCell className="max-w-[200px] truncate">{form.description}</TableCell>
-                                )}
-                                {columns.updatedAt && (
-                                    <TableCell>
-                                        {new Date(form.updatedAt).toLocaleString("pt-BR", {
-                                            day: "2-digit",
-                                            month: "2-digit",
-                                            year: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit"
-                                        })}
-                                    </TableCell>
-                                )}
-                                {columns.responses && (
-                                    <TableCell className="max-w-[120px]">
-                                        <Link href={`/admin/criar-formulario/${form.idForm}/respostas`}>
-                                            <Badge className="inline-flex items-center gap-2 px-2 py-1 whitespace-nowrap">
-                                                <ListChecks className="h-3.5 w-3.5" />
-                                                <span>
-                                                    {form.responses} {form.responses === 1 ? "Resposta" : "Respostas"}
-                                                </span>
-                                            </Badge>
-                                        </Link>
-                                    </TableCell>
-                                )}
-                                {columns.actions && (
-                                    <TableCell className="text-center p-0 justify-center items-center">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="rounded-full">
-                                                    <MoreVertical className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/admin/criar-formulario/${form.idForm}`}>
-                                                        <Edit className="mr-2 h-4 w-4" />
-                                                        Editar Formulário
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/admin/responder-formulario/${form.idForm}`}>
-                                                        <List className="mr-2 h-4 w-4" />
-                                                        Responder Formulário
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/admin/atribuir-usuarios/${form.idForm}`}>
-                                                        <UserPlus className="mr-2 h-4 w-4" />
-                                                        Atribuir Usuários
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/admin/criar-formulario/${form.idForm}/respostas`} className="cursor-pointer">
-                                                        <ListChecks className="mr-2 h-4 w-4" />
-                                                        <span>Ver Respostas</span>
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem
-                                                    className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer"
-                                                    onSelect={() => handleDelete(form.idForm)}
-                                                >
-                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                    Excluir
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                )}
-                            </TableRow>
-                        ))}
+                        {isLoading ? (
+                            // show skeleton rows while loading
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={`skeleton-${i}`}>
+                                    {columns.title && <TableCell><Skeleton className="h-4 w-40" /></TableCell>}
+                                    {columns.description && <TableCell><Skeleton className="h-4 w-60" /></TableCell>}
+                                    {columns.updatedAt && <TableCell><Skeleton className="h-4 w-32" /></TableCell>}
+                                    {columns.responses && <TableCell><Skeleton className="h-4 w-24" /></TableCell>}
+                                    {columns.actions && <TableCell><Skeleton className="h-4 w-12 mx-auto" /></TableCell>}
+                                </TableRow>
+                            ))
+                        ) : (
+                            forms.map((form) => (
+                                <TableRow key={form.idForm}>
+                                    {columns.title && <TableCell>{form.title}</TableCell>}
+                                    {columns.description && (
+                                        <TableCell className="max-w-[200px] truncate">{form.description}</TableCell>
+                                    )}
+                                    {columns.updatedAt && (
+                                        <TableCell>
+                                            {new Date(form.updatedAt).toLocaleString("pt-BR", {
+                                                day: "2-digit",
+                                                month: "2-digit",
+                                                year: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit"
+                                            })}
+                                        </TableCell>
+                                    )}
+                                    {columns.responses && (
+                                        <TableCell className="max-w-[120px]">
+                                            <Link href={`/admin/criar-formulario/${form.idForm}/respostas`}>
+                                                <Badge className="inline-flex items-center gap-2 px-2 py-1 whitespace-nowrap">
+                                                    <ListChecks className="h-3.5 w-3.5" />
+                                                    <span>
+                                                        {form.responses} {form.responses === 1 ? "Resposta" : "Respostas"}
+                                                    </span>
+                                                </Badge>
+                                            </Link>
+                                        </TableCell>
+                                    )}
+                                    {columns.actions && (
+                                        <TableCell className="text-center p-0 justify-center items-center">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="rounded-full">
+                                                        <MoreVertical className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/admin/criar-formulario/${form.idForm}`}>
+                                                            <Edit className="mr-2 h-4 w-4" />
+                                                            Editar Formulário
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/admin/responder-formulario/${form.idForm}`}>
+                                                            <List className="mr-2 h-4 w-4" />
+                                                            Responder Formulário
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/admin/atribuir-usuarios/${form.idForm}`}>
+                                                            <UserPlus className="mr-2 h-4 w-4" />
+                                                            Atribuir Usuários
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/admin/criar-formulario/${form.idForm}/respostas`} className="cursor-pointer">
+                                                            <ListChecks className="mr-2 h-4 w-4" />
+                                                            <span>Ver Respostas</span>
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer"
+                                                        onSelect={() => handleDelete(form.idForm)}
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        Excluir
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    )}
+                                </TableRow>
+                            ))
+                        )}
                     </TableBody>
                 </Table>
-                </div>
-            )}
+            </div>
 
             <div className="flex justify-end items-center mt-4 space-x-2">
                 <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>

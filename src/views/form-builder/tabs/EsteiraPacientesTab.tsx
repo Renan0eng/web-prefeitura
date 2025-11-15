@@ -4,6 +4,7 @@ import AgendarConsultaDialog from "@/components/appointments/AgendarConsultaDial
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import api from "@/services/api"
 import { Calendar, Eye, MoreVertical } from "lucide-react"
@@ -71,21 +72,29 @@ export default function EsteiraPacientesTab() {
             </div>
 
             {error && <p className="text-red-500">{error}</p>}
-            {isLoading ? (
-                <p>Carregando...</p>
-            ) : (
-                <Table className="overflow-hidden rounded-lg border">
-                    <TableHeader className="sticky top-0 z-10 bg-muted">
-                        <TableRow>
-                            {visibleColumnsEsteira.form && <TableHead>Formulário</TableHead>}
-                            {visibleColumnsEsteira.paciente && <TableHead>Paciente</TableHead>}
-                            {visibleColumnsEsteira.dataEnvio && <TableHead>Data de Envio</TableHead>}
-                            {visibleColumnsEsteira.pontuacao && <TableHead>Pontuação Total</TableHead>}
-                            <TableHead className="max-w-12 text-center">Ações</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody className="bg-white/40">
-                        {formsResponses.map((response) => (
+            <Table className="overflow-hidden rounded-lg border">
+                <TableHeader className="sticky top-0 z-10 bg-muted">
+                    <TableRow>
+                        {visibleColumnsEsteira.form && <TableHead>Formulário</TableHead>}
+                        {visibleColumnsEsteira.paciente && <TableHead>Paciente</TableHead>}
+                        {visibleColumnsEsteira.dataEnvio && <TableHead>Data de Envio</TableHead>}
+                        {visibleColumnsEsteira.pontuacao && <TableHead>Pontuação Total</TableHead>}
+                        <TableHead className="max-w-12 text-center">Ações</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody className="bg-white/40">
+                    {isLoading ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                            <TableRow key={`skel-${i}`}>
+                                {visibleColumnsEsteira.form && <TableCell><Skeleton className="h-4 w-48" /></TableCell>}
+                                {visibleColumnsEsteira.paciente && <TableCell><Skeleton className="h-4 w-32" /></TableCell>}
+                                {visibleColumnsEsteira.dataEnvio && <TableCell><Skeleton className="h-4 w-36" /></TableCell>}
+                                {visibleColumnsEsteira.pontuacao && <TableCell><Skeleton className="h-4 w-20" /></TableCell>}
+                                <TableCell className="text-center"><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                        formsResponses.map((response) => (
                             <TableRow key={response.idResponse}>
                                 {visibleColumnsEsteira.form && (
                                     <TableCell title={response.form?.title || "Sem título"}>
@@ -142,10 +151,10 @@ export default function EsteiraPacientesTab() {
                                     </DropdownMenu>
                                 </TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            )}
+                        ))
+                    )}
+                </TableBody>
+            </Table>
                 {/* Agendamento dialog */}
                 {selectedResponse && (
                     <AgendarConsultaDialog
