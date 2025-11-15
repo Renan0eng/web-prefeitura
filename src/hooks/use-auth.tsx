@@ -65,28 +65,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadSession = async () => {
       try {
-        const { data: refreshData } = await api.post('/auth/refresh')
-        const newAccessToken = refreshData.accessToken
-        setAccessToken(newAccessToken)
-
-        const { data } = await api.get('/auth/me', {
-          headers: { 'Authorization': `Bearer ${newAccessToken}` }
-        })
+        const { data } = await api.get('/auth/me')
         setUser(data)
-
       } catch (err) {
         console.error("Nenhuma sessão válida encontrada.", err)
         if (path !== '/auth/login' && path !== '/auth/sign-up') {
           router.push('/auth/login')
         }
         setUser(null)
-        setAccessToken(null)
       } finally {
         setLoading(false)
       }
     }
     loadSession()
-  }, [router])
+  }, [router, path])
 
   useEffect(() => {
     if (accessToken) {

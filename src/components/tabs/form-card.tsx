@@ -6,6 +6,9 @@ import EsteiraPacientesTab from "@/views/form-builder/tabs/EsteiraPacientesTab"
 import FormulariosTab from "@/views/form-builder/tabs/FormulariosTab"
 
 export default function FormCard() {
+
+  
+
   return (
     <Tabs defaultValue="forms" className="flex w-full flex-col justify-start gap-6">
       <TabsList>

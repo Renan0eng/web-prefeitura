@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useAlert } from "@/hooks/use-alert"
 import api from "@/services/api"
+import axios, { AxiosError } from "axios"
 import { Calendar, Eye, MoreVertical } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -24,16 +26,25 @@ export default function EsteiraPacientesTab() {
     const [isAgendarOpen, setIsAgendarOpen] = useState(false)
     const [selectedResponse, setSelectedResponse] = useState<any | null>(null)
 
+    const { setAlert } = useAlert();
+
     const fetchResponses = async () => {
         try {
             setIsLoading(true)
             const res = await api.get("/forms/responses/list")
             setFormsResponses(res.data || [])
-        } catch (err) {
-            console.error("Erro ao buscar respostas:", err)
-            setError("Não foi possível carregar as respostas.")
-        } finally {
             setIsLoading(false)
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                const axiosErr = error as AxiosError<{ message?: string }>
+                const serverMessage = axiosErr.response?.data?.message
+                console.error('Erro ao buscar respostas (axios):', axiosErr)
+                setAlert(serverMessage ?? axiosErr.message ?? 'Não foi possível carregar as respostas.', 'error')
+            } else {
+                console.error('Erro ao buscar respostas (não-axios):', error)
+                const msg = error instanceof Error ? error.message : String(error)
+                setAlert(msg ?? 'Não foi possível carregar as respostas.', 'error')
+            }
         }
     }
 
@@ -141,12 +152,12 @@ export default function EsteiraPacientesTab() {
                                                     <span>Visualizar Resposta</span>
                                                 </Link>
                                             </DropdownMenuItem>
-                                                <DropdownMenuItem onSelect={() => { setSelectedResponse(response); setIsAgendarOpen(true); }}>
-                                                    <button className="flex items-center w-full text-left">
-                                                        <Calendar className="mr-2 h-4 w-4" />
-                                                        <span>Agendar Consulta</span>
-                                                    </button>
-                                                </DropdownMenuItem>
+                                            <DropdownMenuItem onSelect={() => { setSelectedResponse(response); setIsAgendarOpen(true); }}>
+                                                <button className="flex items-center w-full text-left">
+                                                    <Calendar className="mr-2 h-4 w-4" />
+                                                    <span>Agendar Consulta</span>
+                                                </button>
+                                            </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TableCell>
@@ -155,21 +166,21 @@ export default function EsteiraPacientesTab() {
                     )}
                 </TableBody>
             </Table>
-                {/* Agendamento dialog */}
-                {selectedResponse && (
-                    <AgendarConsultaDialog
-                        isOpen={isAgendarOpen}
-                        onOpenChange={(open) => {
-                            setIsAgendarOpen(open)
-                            if (!open) setSelectedResponse(null)
-                        }}
-                        response={selectedResponse}
-                        onScheduled={() => {
-                            // refresh responses after scheduling if needed
-                            fetchResponses()
-                        }}
-                    />
-                )}
+            {/* Agendamento dialog */}
+            {selectedResponse && (
+                <AgendarConsultaDialog
+                    isOpen={isAgendarOpen}
+                    onOpenChange={(open) => {
+                        setIsAgendarOpen(open)
+                        if (!open) setSelectedResponse(null)
+                    }}
+                    response={selectedResponse}
+                    onScheduled={() => {
+                        // refresh responses after scheduling if needed
+                        fetchResponses()
+                    }}
+                />
+            )}
         </>
     )
 }
