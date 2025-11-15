@@ -1,6 +1,7 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import AgendamentosTab from "@/views/appointments/AgendamentosTab"
 import EsteiraPacientesTab from "@/views/form-builder/tabs/EsteiraPacientesTab"
 import FormulariosTab from "@/views/form-builder/tabs/FormulariosTab"
 
@@ -10,7 +11,7 @@ export default function FormCard() {
       <TabsList>
         <TabsTrigger value="forms">Formulários</TabsTrigger>
         <TabsTrigger value="esteira-pacientes">Esteira de Pacientes</TabsTrigger>
-        <TabsTrigger value="tab3">Tab 3</TabsTrigger>
+  <TabsTrigger value="agendamentos">Agendamentos</TabsTrigger>
       </TabsList>
 
       <TabsContent value="forms" className="mt-4">
@@ -21,8 +22,8 @@ export default function FormCard() {
         <EsteiraPacientesTab />
       </TabsContent>
 
-      <TabsContent value="tab3" className="mt-4">
-        tab 3 content
+      <TabsContent value="agendamentos" className="mt-4">
+        <AgendamentosTab />
       </TabsContent>
     </Tabs>
   )
