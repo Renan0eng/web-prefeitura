@@ -32,6 +32,9 @@ export default function AgendarConsultaDialog({ isOpen, onOpenChange, response, 
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [doctors, setDoctors] = React.useState<any[]>([])
     const [loadingDoctors, setLoadingDoctors] = React.useState(false)
+    const [responseDetail, setResponseDetail] = React.useState<any | null>(null)
+    const [showDetails, setShowDetails] = React.useState(false)
+    const [loadingResponseDetail, setLoadingResponseDetail] = React.useState(false)
     const { setAlert } = useAlert()
 
     const form = useForm<AgendamentoFormValues>({
@@ -58,6 +61,37 @@ export default function AgendarConsultaDialog({ isOpen, onOpenChange, response, 
         }
         fetchDoctors()
     }, [isOpen, setAlert])
+
+    // Fetch response details on demand when user requests "Detalhes do formulário"
+    const fetchResponseDetail = async () => {
+        try {
+            if (!response) return
+            if (response.answers && response.answers.length > 0) {
+                setResponseDetail(response)
+                return
+            }
+            const formId = response.form?.idForm || response.formId || null
+            const responseId = response.idResponse
+            if (!formId || !responseId) return
+            setLoadingResponseDetail(true)
+            const res = await api.get(`/forms/${formId}/responses/${responseId}`)
+            setResponseDetail(res.data)
+        } catch (err) {
+            console.warn('Não foi possível carregar detalhes da resposta:', err)
+            setAlert('Não foi possível carregar os detalhes da resposta.', 'error')
+        } finally {
+            setLoadingResponseDetail(false)
+        }
+    }
+
+    const handleToggleDetails = async () => {
+        const newState = !showDetails
+        setShowDetails(newState)
+        if (newState && !responseDetail) {
+            await fetchResponseDetail()
+        }
+    }
+
 
     React.useEffect(() => {
         // if dialog opened for a response, prefill patient and reset on close
@@ -95,7 +129,7 @@ export default function AgendarConsultaDialog({ isOpen, onOpenChange, response, 
 
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-            <DialogContent className="max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-h-[90vh] overflow-y-auto scrollable">
                 <DialogHeader>
                     <DialogTitle>Agendar Consulta</DialogTitle>
                     <DialogDescription>
@@ -104,6 +138,42 @@ export default function AgendarConsultaDialog({ isOpen, onOpenChange, response, 
                 </DialogHeader>
 
                 <Form {...form}>
+                    {/* botão para exibir/ocultar detalhes do formulário (carrega sob demanda) */}
+                    <div className="mb-3">
+                        <button type="button" className="text-sm text-primary underline" onClick={handleToggleDetails}>
+                            {showDetails ? 'Ocultar detalhes do formulário' : 'Detalhes do formulário'}
+                        </button>
+                    </div>
+
+                    {/* Preview rápido da resposta (carregado apenas quando showDetails=true) */}
+                    {showDetails && (
+                        responseDetail ? (
+                            <div className="bg-muted p-3 rounded-md border mb-4 overflow-auto scrollable">
+                                <div className="mb-2">
+                                    <div className="font-medium">{responseDetail.form?.title || response.form?.title || 'Formulário'}</div>
+                                    <div className="text-xs text-muted-foreground">Enviado em: {new Date(responseDetail.submittedAt || response.submittedAt).toLocaleString('pt-BR')}</div>
+                                    <div className="text-xs text-muted-foreground">Paciente: {responseDetail.user?.name || response.user?.name || 'Anônimo'}</div>
+                                    <div className="text-xs text-primary-500 font-bold">Pontuação Total: {responseDetail.totalScore ?? response.totalScore ?? 0}</div>
+                                </div>
+                                <div className="space-y-2">
+                                    {responseDetail.answers?.slice(0, 8).map((ans: any) => (
+                                        <div key={ans.question?.idQuestion || ans.idQuestion} className="text-sm">
+                                            <div className="flex justify-between items-start">
+                                                <div className="font-semibold">{ans.question?.text || 'Pergunta sem título'}</div>
+                                                <div className="text-xs text-muted-foreground">{ans.score !== undefined && ans.score !== null ? `Pontuação: ${ans.score}` : ''}</div>
+                                            </div>
+                                            <div className="text-[13px] text-muted-foreground">{(ans.value ?? (ans.values && ans.values.join(', ')) ?? '').toString()}</div>
+                                        </div>
+                                    ))}
+                                    {responseDetail.answers && responseDetail.answers.length > 8 && (
+                                        <div className="text-xs text-muted-foreground">...mais respostas ocultas</div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="p-3 mb-4 text-sm text-muted-foreground">{loadingResponseDetail ? 'Carregando detalhes...' : 'Detalhes da resposta não disponíveis.'}</div>
+                        )
+                    )}
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
