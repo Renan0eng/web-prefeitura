@@ -63,6 +63,7 @@ export default function RegisterPatientPage({idUser}: {idUser?: string}) {
       try {
         setIsLoadingForms(true)
         const res = await api.get('/forms/screenings')
+        console.log("screenings: ",res.data);
         setScreeningForms(res.data.forms || res.data || [])
       } catch (err) {
         console.error('Erro ao buscar formulários de screening', err)
@@ -160,9 +161,11 @@ export default function RegisterPatientPage({idUser}: {idUser?: string}) {
     try {
       if (idUser) {
         await api.put(`/patients/${idUser}`, payload)
+        // responde o formulario
         setAlert('Paciente atualizado com sucesso', 'success')
       } else {
         await api.post('/patients', payload)
+        // responde o formulario
         setAlert('Paciente cadastrado com sucesso', 'success')
       }
     } catch (err: any) {
