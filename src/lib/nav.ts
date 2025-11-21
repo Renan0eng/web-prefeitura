@@ -3,10 +3,10 @@ import {
   Home,
   Shield,
   User,
-  UserCheck
+  UserCheck,
+  UserPlus
 } from "lucide-react";
 
-const levels = ["acesso", "gerenciar-usuarios", "formulario"];
 
 export const data = {
   user: {
@@ -50,6 +50,13 @@ export const data = {
       icon: User,
       isActive: false,
       nivel_acesso: "gerenciar-usuarios",
+    },
+    {
+      title: "Pacientes",
+      url: "/admin/pacientes",
+      icon: UserPlus,
+      isActive: false,
+      nivel_acesso: "paciente",
     },
   ],
   flow: [

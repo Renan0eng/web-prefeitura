@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAlert } from "@/hooks/use-alert"
-import { userFormSchema } from "@/schemas/usuario"
+import { userCreateFormSchema, userUpdateFormSchema } from "@/schemas/usuario"
 import api from "@/services/api"
 import { EnumUserType, NivelAcesso, UserComNivel, UserFormData } from "@/types/access-level"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -49,8 +49,13 @@ export function UserFormDialog({
     const { setAlert } = useAlert()
     const isEditing = !!userToEdit;
 
-    const form = useForm<z.infer<typeof userFormSchema>>({
-        resolver: zodResolver(userFormSchema),
+    // se for edição, userUpdateFormSchema
+    // se for criação, userCreateFormSchema
+
+    const schema = isEditing ? userUpdateFormSchema : userCreateFormSchema;
+
+    const form = useForm<z.infer<typeof schema>>({
+        resolver: zodResolver(schema),
         defaultValues: {
             name: "",
             email: "",
@@ -58,9 +63,9 @@ export function UserFormDialog({
             cpf: null,
             cep: null,
             phone: null,
-            nivelAcessoId: "",
-            type: EnumUserType.PACIENTE, // Default
-            active: true, 
+            nivelAcessoId: "1",
+            type: EnumUserType.USUARIO,
+            active: true,
         },
     })
 
@@ -86,8 +91,8 @@ export function UserFormDialog({
                 cpf: null,
                 cep: null,
                 phone: null,
-                nivelAcessoId: "",
-                type: EnumUserType.PACIENTE,
+                nivelAcessoId: "1",
+                type: EnumUserType.USUARIO,
                 active: true,
             })
         }
@@ -102,7 +107,7 @@ export function UserFormDialog({
         }
     }, [form, niveisAcesso, form.watch("type")]);
 
-    async function onSubmit(values: z.infer<typeof userFormSchema>) {
+    async function onSubmit(values: z.infer<typeof schema>) {
         setIsSubmitting(true);
 
         const payload: UserFormData = {
@@ -216,16 +221,7 @@ export function UserFormDialog({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {/* {form.watch("type") === EnumUserType.PACIENTE ? niveisAcesso.filter(nivel => nivel.idNivelAcesso !== 1).map(nivel => (
-                                                    <SelectItem key={nivel.idNivelAcesso} value={String(nivel.idNivelAcesso)}>
-                                                        {nivel.nome}
-                                                    </SelectItem>
-                                                )) : niveisAcesso.filter(nivel => nivel.idNivelAcesso === 1).map(nivel => (
-                                                    <SelectItem key={nivel.idNivelAcesso} value={String(nivel.idNivelAcesso)}>
-                                                        {nivel.nome}
-                                                    </SelectItem>
-                                                ))} */}
-                                                { niveisAcesso.map(nivel => (
+                                                {niveisAcesso.filter(nivel => nivel.idNivelAcesso !== 2).map(nivel => (
                                                     <SelectItem key={nivel.idNivelAcesso} value={String(nivel.idNivelAcesso)}>
                                                         {nivel.nome}
                                                     </SelectItem>
@@ -249,11 +245,17 @@ export function UserFormDialog({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {Object.values(EnumUserType).map(typeValue => (
-                                                    <SelectItem key={typeValue} value={typeValue}>
-                                                        {typeValue}
-                                                    </SelectItem>
-                                                ))}
+                                                {/* remove   
+                                                    ADMIN = "ADMIN",
+                                                    PACIENTE = "PACIENTE", 
+                                                */}
+                                                {Object.values(EnumUserType)
+                                                    .filter(typeValue => typeValue !== "ADMIN" && typeValue !== "PACIENTE")
+                                                    .map(typeValue => (
+                                                        <SelectItem key={typeValue} value={typeValue}>
+                                                            {typeValue}
+                                                        </SelectItem>
+                                                    ))}
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -261,28 +263,6 @@ export function UserFormDialog({
                                 )}
                             />
                         </div>
-
-                        {/* Status Ativo */}
-                        {/* <FormField
-                            control={form.control}
-                            name="active"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                    <div className="space-y-0.5">
-                                        <FormLabel>Status</FormLabel>
-                                        <FormDescription>
-                                            Permite que o usuário faça login no sistema.
-                                        </FormDescription>
-                                    </div>
-                                    <FormControl>
-                                        <Switch
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                        />
-                                    </FormControl>
-                                </FormItem>
-                            )}
-                        /> */}
 
                         <DialogFooter>
                             <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)} disabled={isSubmitting}>

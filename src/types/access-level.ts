@@ -17,8 +17,9 @@ export type MenuAcesso = {
 
 export enum EnumUserType {
   ADMIN = "ADMIN",
+  PACIENTE = "PACIENTE",
   USUARIO = "USUARIO",
-  PACIENTE = "PACIENTE"
+  MEDICO = "MEDICO",
 }
 
 export type User = {
