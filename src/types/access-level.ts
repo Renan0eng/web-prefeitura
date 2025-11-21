@@ -51,7 +51,7 @@ export type UserFormData = {
     password?: string; 
     passwordConfirmation?: string;
     avatar?: string | null;
-    cpf?: string | null;
+    cpf: string;
     cep?: string | null;
     phone?: string | null;
     nivelAcessoId: number;

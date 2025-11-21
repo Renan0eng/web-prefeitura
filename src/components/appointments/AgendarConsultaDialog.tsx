@@ -48,10 +48,9 @@ export default function AgendarConsultaDialog({ isOpen, onOpenChange, response, 
             try {
                 setLoadingDoctors(true)
                 // endpoint returns users with access level info; filter by type 'USUARIO' (medicos)
-                const res = await api.get('/admin/acesso/users')
+                const res = await api.get('/appointments/users/professional')
                 const list = res.data || []
-                const filtered = list.filter((u: any) => u.type === 'USUARIO')
-                setDoctors(filtered)
+                setDoctors(list)
             } catch (err) {
                 console.error('Erro ao buscar médicos:', err)
                 setAlert('Não foi possível carregar lista de médicos.', 'error')
@@ -209,7 +208,8 @@ export default function AgendarConsultaDialog({ isOpen, onOpenChange, response, 
                                 <FormItem>
                                     <FormLabel>Data e Hora*</FormLabel>
                                     <FormControl>
-                                        <Input type="datetime-local" {...field} />
+                                        {/* data minima hoje */}
+                                        <Input type="datetime-local" {...field} min={new Date().toISOString().slice(0,16)} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

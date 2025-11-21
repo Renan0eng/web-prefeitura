@@ -60,7 +60,7 @@ export function UserFormDialog({
             name: "",
             email: "",
             avatar: null,
-            cpf: null,
+            cpf: "",
             cep: null,
             phone: null,
             nivelAcessoId: "1",
@@ -76,7 +76,7 @@ export function UserFormDialog({
                 name: userToEdit.name,
                 email: userToEdit.email,
                 avatar: userToEdit.avatar,
-                cpf: userToEdit.cpf,
+                cpf: userToEdit.cpf || "111.111.111-11",
                 cep: userToEdit.cep,
                 phone: userToEdit.phone,
                 nivelAcessoId: String(userToEdit.nivel_acesso.idNivelAcesso),
@@ -88,7 +88,7 @@ export function UserFormDialog({
                 name: "",
                 email: "",
                 avatar: null,
-                cpf: null,
+                cpf: "",
                 cep: null,
                 phone: null,
                 nivelAcessoId: "1",
@@ -113,7 +113,8 @@ export function UserFormDialog({
         const payload: UserFormData = {
             ...values,
             nivelAcessoId: parseInt(values.nivelAcessoId, 10),
-        };
+            cpf: values.cpf ?? "111.111.111-11",
+        } as UserFormData;
         delete payload.passwordConfirmation;
 
 
@@ -201,6 +202,20 @@ export function UserFormDialog({
                                     <FormLabel>Confirmação de Senha{isEditing ? " (deixe em branco para manter a atual)" : "*"}</FormLabel>
                                     <FormControl>
                                         <Input type="password" placeholder="Confirme a senha" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="cpf"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>CPF</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="000.000.000-00" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
